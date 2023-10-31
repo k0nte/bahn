@@ -4,8 +4,8 @@ require "kennzeichen.php";
 $context = stream_context_create([
 		"http" => [
 			"header" => "Accept: application/vnd.de.db.ris+json
-DB-Client-Id: b8a97e9b2dd01a81302f7d2cc384599e
-DB-Api-Key: 9cc94c471e26d163d680f4dae065b264"
+DB-Client-Id: $db_client
+DB-Api-Key: $db_api"
 		] ]);
 	
 $q = urldecode($_GET["q"]);
