@@ -1,6 +1,7 @@
 <?php
 date_default_timezone_set("Europe/Berlin");
 require "kennzeichen.php";
+require "db_api.php";
 $context = stream_context_create([
 		"http" => [
 			"header" => "Accept: application/vnd.de.db.ris+json
