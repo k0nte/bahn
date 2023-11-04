@@ -1,12 +1,12 @@
 ﻿<?php
 $nachricht = "";
-if (isset($_GET["q"]))
+if (isset($_GET["xq"]))
 	require "redirect.php";
 ?>
 <html style="font-family: Raleway, Verdana, Sans">
 <head>
 	<title>Bahnsuche</title>
-	<meta name="viewport" content="width=device-width, initial-scale=0.7, minimum-scale=0.7">
+	<meta name="viewport" content="width=device-width, initial-scale=0.75, minimum-scale=0.75">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<style>
 		code { 
@@ -21,8 +21,10 @@ if (isset($_GET["q"]))
 			background: #fff3; 
 			margin: 30px auto; 
 			padding: 12px; width: 70%; 
+			font-size: 1.15em;
 		}
 		a, a:visited { color: #23d}
+		#breit, #schmal { padding: 10px 50px; display: block }
 		#schmal { display: none }
 		@media (max-width:900px) { 
 			#schmal { display: block }
@@ -34,7 +36,7 @@ if (isset($_GET["q"]))
 		}
 		#flex {
 			display: flex;
-			width: min(95%, 750px);
+			width: min(95%, 800px);
 			flex-wrap: wrap;
 			align-items: center;
 			justify-content: center;
@@ -74,7 +76,7 @@ if (isset($_GET["q"]))
 			echo "<span style='font-size:1.4em; color:#800'>$nachricht</span>";
 		?>
 		<form action="./">
-			<input id="input" name="q" style="width: 90%; max-width: 700px; margin: 10px; font-size: 1.2em; border-radius: 4px; padding: 9px" placeholder="Berlin Hamburg 19 Uhr" value="<?php if (isset($q)) echo $q ?>" />
+			<input id="input" name="xq" style="width: 90%; max-width: 700px; margin: 10px; font-size: 1.2em; border-radius: 4px; padding: 9px" placeholder="Berlin Hamburg 19 Uhr" value="<?php if (isset($q)) echo $q ?>" />
 			<script>document.getElementById("input").focus()</script>
 		</form>
 		<?php 
@@ -105,26 +107,28 @@ Münster Frankfurt</b></code></div>
 <b>Köln Bonn am 3.</b>     <i>= am 3. (z.B. 3.10.)</i>
 <b>Köln Bonn 3.10.</b>     <i>= am 3. Oktober</i>
 <b>Köln Bonn 15:30</b>     <i>= um 15:30 Uhr</i>
-<b>Köln Bonn 15h</b>       <i>(oder 15)</i>
 <b>Köln Bonn auf 15h</b>   <i>= Ankunft 15 Uhr</i></code>
 			</div>
 			<div>Einstellungen<!--<br>(werden für nächsten <br>Aufruf gespeichert)--></div>
 			<div>
 				<code><b>bahncard25</b> / <b>bc25</b>   <i>= mit Bahncard 25</i>
 <b>Nahverkehr</b> / <b>NAH</b>    <i>= nur Nahverkehr</i>
-<b>Fahrrad</b> / <b>RAD</b>       <i>= mit Fahrrad</i><!--<b>Bestpreis</b> / <b>BEST</b>-->
+<b>Bestpreise</b> / <b>BEST</b>   <i>= Bestpreise anzeigen</i>
+<b>Fahrrad</b> / <b>RAD</b>       <i>= mit Fahrrad</i>
 <b>Langsam</b> / <b>LANG</b>      <i>= auch langsame Verb.</i>
 <b>Klasse</b>              <i>= 1. Klasse</i></code>
 			</div>
 			<div>Beispiele</div>
-			<div><code><b>Rostock nach Hamburg Freitag 16h NAH</b>
+			<div><code><b>Rostock nach Hamburg Freitag 16h NAH</b>  <i>= nächsten Freitag um 16 Uhr im Nahverkehr</i>
 <b>B S 2. 15 bc</b> <i>= Berlin nach Stuttgart am 2. um 15 Uhr mit Bahncard25</i></code>
 			</div>
 			<div>Speichern für zukünftige Suchen</div>
-			<div><code><b>var = Lüchtringen</b>
+			<div><code><b>BC25</b> / <b>NAH</b> / <b>BEST</b> / <b title="Bestpreise ab 120km Entfernung außer bei NAH">BPFERN</b> / <b>RAD</b> / …
+<i>Nur einen Befehl eintippen; dieser wird für zukünftige Suchen gespeichert.</i>
+
+<b>var = Lüchtringen</b>
 <i>Der Bahnhof wird unter „var“ gespeichert und kann bei zukünftigen Suchen verwendet werden.</i>
-<b>BC25</b> / <b>NAH</b> / <b>RAD</b> / <b>LANG</b> / <b>KLASSE</B>
-<i>= Merke BC25 etc. für zukünftige Suchen</i>
+
 <b>-BC25</b> / …    <i>= Einstellung/Bahnhof entfernen</i>
 </code>
 			</div>

@@ -1,4 +1,5 @@
 <?php
+$time = time();
 date_default_timezone_set("Europe/Berlin");
 require "kennzeichen.php";
 require "db_api.php";
@@ -33,8 +34,8 @@ DB-Client-Id: $db_client
 DB-Api-Key: $db_api"
 	] ]);
 	
-$q = urldecode($_GET["q"]);
-$q1 = preg_replace("#[ \-]+$#", "", 			str_replace(["NAH", "RAD", "LANG", "BEST"], "", 
+$q = urldecode($_GET["xq"]);
+$q1 = preg_replace("#[ \-]+$#", "", 			str_replace(["NAH", "RAD", "LANG", "FERN", "BEST", "BPFERN"], "", 
 		str_ireplace(["bc25", "bahncard25", "bc50", "bahncard50", "bc", "nahverkehr", "klasse", "fahrrad", "langsam", "bestpreise", "bestpreis", "kalender"], "", $q)));
 
 # (^von *)
@@ -42,10 +43,13 @@ preg_match("#(([\pL\/ ]+)( *\- *| +nach +| +n +)([\pL\/ ]+?)|([\pL\/]+) +([\pL\/
 $start  = @$match[2] ? trim(@$match[2]) : trim(@$match[5]);
 $ziel   = @$match[4] ? trim(@$match[4]) : trim(@$match[6]);
 
-$keywords = ["bc", "bc25", "bc50", "bahncard", "bahncard25", "nah", "klasse", "rad", "lang", "best"];
+$keywords = ["bc", "bc25", "bc50", "bahncard", "bahncard25", "nah", "klasse", "rad", "lang", "best", "bestpreis", "bestpreise", "bpfern"];
 
+if (in_array(strtolower($q), ["start", "home", "info", "hilfe", "help"])) {
+	$q = "";
+	return $nachricht = "Hallo!";
 												// Speichere Variablen/Einstellungen
-if (strpos($q, "=") || strpos($q, "-") === 0 || in_array(strtolower($q), $keywords)) {	
+} elseif (strpos($q, "=") || strpos($q, "-") === 0 || in_array(strtolower($q), $keywords)) {	
 	$data = explode("=", $q);
 	$true = (count($data) == 1 || in_array($data[1], ["true", "wahr", "1"])) ? true : 
 			(in_array($data[1], ["false", "falsch", "0", ""]) ? false : null);
@@ -78,7 +82,7 @@ if (strpos($q, "=") || strpos($q, "-") === 0 || in_array(strtolower($q), $keywor
 		}
 	}
 } elseif ($ziel) {								// Fahrplanauskunft
-	function aktiv($wert, $auchwert, $extra = "") {
+	function aktiv($wert, $auchwert = "", $extra = "") {
 		global $q;
 		if ($auchwert)
 			$auchwert = "|$auchwert";
@@ -88,14 +92,14 @@ if (strpos($q, "=") || strpos($q, "-") === 0 || in_array(strtolower($q), $keywor
 			return true;
 		if ($extra && preg_match("#$extra#", $q))
 			return false;
-		return (bool) $_COOKIE[$wert];
+		return (bool) @$_COOKIE[$wert];
 	}
 
 	$start_parts = explode(" ", $start);
 	foreach ($start_parts as $key => $part) {
 		if (isset($_COOKIE["station"]) && array_key_exists($part, $_COOKIE["station"]))
-			$start_parts[$key] = $_COOKIE["station"][$start];
-		if (strlen($start_parts[$key]) <= 3)
+			$start_parts[$key] = $_COOKIE["station"][$start];				// Gespeicherte Variablen
+		if (strlen($start_parts[$key]) <= 3)				// KFZ-Kennzeichen
 			$start_parts[$key] = isset($kennzeichen[mb_strtoupper($start_parts[$key])]) ? $kennzeichen[mb_strtoupper($start_parts[$key])] : $start_parts[$key];
 	}
 	$start = join(" ", $start_parts);
@@ -111,15 +115,17 @@ if (strpos($q, "=") || strpos($q, "-") === 0 || in_array(strtolower($q), $keywor
 
 	$file = file_get_contents("https://apis.deutschebahn.com/db-api-marketplace/apis/ris-stations/v1/stop-places/by-name/".urlencode($start), false, $context);
 	$station = json_decode($file)->stopPlaces;
-	if (!isset($station[0]))
+	$si1 = $start == strtoupper($start) ? 1 : 0;
+	if (!isset($station[$si1]))
 		return $nachricht = "Start nicht gefunden!";
-	$start = $station[0]->names->DE->nameLong;
+	$start = $station[$si1]->names->DE->nameLong;
 	
 	$file = file_get_contents("https://apis.deutschebahn.com/db-api-marketplace/apis/ris-stations/v1/stop-places/by-name/".urlencode($ziel), false, $context);
 	$station2 = json_decode($file)->stopPlaces;
-	if (!isset($station2[0]))
+	$si2 = $ziel == strtoupper($ziel) ? 1 : 0;
+	if (!isset($station2[$si2]))
 		return $nachricht = "Ziel nicht gefunden!";
-	$ziel = $station2[0]->names->DE->nameLong;
+	$ziel = $station2[$si2]->names->DE->nameLong;
 	
 	$bc25 	= aktiv("BC25", "(?i)bc25|(?i)bahncard|(?i)bc$");
 	$kl		= aktiv("KLASSE", "(?i)klasse|(?i)class", "(?i)klasse2") ? 1 : 2;
@@ -150,30 +156,39 @@ if (strpos($q, "=") || strpos($q, "-") === 0 || in_array(strtolower($q), $keywor
 	}
 	$hd = date("Y-m-d\TH:i:s", $date);
 	
+	$long1 = $station[$si1]->position->longitude;
+	$lat1  = $station[$si1]->position->latitude;
+	$long2 = $station2[$si2]->position->longitude;
+	$lat2  = $station2[$si2]->position->latitude;
+	$dist = sqrt( pow(($lat2 - $lat1) * 111.13, 2) + pow(($long2 - $long1) * 71.44, 2) );
 	$so = myUrlEncode($start);
 	$zo = myUrlEncode($ziel);
-	$soei = $station[0]->evaNumber;
-	$zoei = $station2[0]->evaNumber;
+	$soei = $station[$si1]->evaNumber;
+	$zoei = $station2[$si2]->evaNumber;
 	$r  = $bc25 ? "13:17:KLASSE_$kl:1" : "13:16:KLASSENLOS:1"; //  			13:17:KLASSE_1:1			13:23:KLASSE_2:1		13:23:KLASSE_1:1
-	$rest = "hza=$ankunft&ar=false&d=false&hz=%5B%5D&bp=false";
+	$nah  = aktiv("NAH", "(?i)nahverkehr", "FERN|(?i)fernverkehr");
+	$rest = "hza=$ankunft&ar=false&d=false&hz=%5B%5D";
 	$rest .= aktiv("LANG", "(?i)langsam") ? "&s=false" : "&s=true";
-	$rest .= aktiv("BEST", "(?i)bestpreis") ? "&bp=true" : "&bp=false";
+	$rest .= (!$nah && $dist > 120 && aktiv("BPFERN")) || aktiv("BESTPREISE", "BEST|(?i)bestpreis") ? "&bp=true" : "&bp=false";
 	if (aktiv("RAD", "(?i)fahrrad")) {
 		$r .= ",3:16:KLASSENLOS:1";
 		$rest .= "&fm=true";
 	}
-	if (aktiv("NAH", "(?i)nahverkehr", "FERN|(?i)fernverkehr"))
+	if ($nah)
 		$rest .= "&vm=03,04,05,06,07,08,09";
-	$long = str_replace(".", "", $station[0]->position->longitude);
-	$lat  = str_replace(".", "", $station[0]->position->latitude);
-	$soid = myUrlEncode("A=1@O=$start@X=$long@Y=$lat@U=80@L=$soei@B=1@p=1698259482@");
-	$long = str_replace(".", "", $station2[0]->position->longitude);
-	$lat  = str_replace(".", "", $station2[0]->position->latitude);
-	$zoid  = myUrlEncode("A=1@O=$ziel@X=$long@Y=$lat@U=80@L=$zoei@B=1@p=1698251742@");
+	$rest .= "&Distanz=".round($dist)."km";
+	$long = str_replace(".", "", $long1);
+	$lat  = str_replace(".", "", $lat1);
+	$soid = myUrlEncode("A=1@O=$start@X=$long@Y=$lat@U=80@L=$soei@B=1@p=$time@");
+	$long = str_replace(".", "", $long2);
+	$lat  = str_replace(".", "", $lat2);
+	$zoid  = myUrlEncode("A=1@O=$ziel@X=$long@Y=$lat@U=80@L=$zoei@B=1@p=$time@");
 	$sotzot = "sot=ST&zot=ST";
 	
 	// echo "<br><br>Start: $start<br>Ziel: $ziel<br>Tag: $tag<br>Wochentag: $wotag<br>Monat: $monat.$jahr<br>Stunde: $stunde<br>Minute: $minute<br>Ankunft: $ankunft<pre>";
 	// var_dump($match);
+	// var_dump($station);
+	// var_dump($station2);
 	// exit;
 	
 	$hash = "sts=true&so=$so&zo=$zo&kl=$kl&r=$r&soid=$soid&zoid=$zoid&$sotzot&soei=$soei&zoei=$zoei&hd=$hd&$rest";
