@@ -35,21 +35,26 @@ DB-Api-Key: $db_api"
 	] ]);
 	
 $q = urldecode($_GET["xq"]);
-$q1 = preg_replace("#[ \-]+$#", "", 			str_replace(["NAH", "RAD", "LANG", "FERN", "BEST", "BPFERN"], "", 
+$q1 = preg_replace("#[ \-]+$#", "", 
+		str_replace(["NAH", "RAD", "LANG", "FERN", "BEST", "BPFERN"], "", 
 		str_ireplace(["bc25", "bahncard25", "bc50", "bahncard50", "bc", "nahverkehr", "klasse", "fahrrad", "langsam", "bestpreise", "bestpreis", "kalender"], "", $q)));
 
-# (^von *)
-preg_match("#(([\pL\/ ]+)( *\- *| +nach +| +n +)([\pL\/ ]+?)|([\pL\/]+) +([\pL\/]+))( *(\d{1,2})\.((\d{1,2})(\.)?(\d{2,4})?)?| (am )?(gestern|übermorgen|morgen|mo|di|mi|do|fr|sa|so)\pL*)?( *(auf|an)? *(\d{1,2}) *(h|uhr)?([,.: ](\d{1,2}))?)?[ \d\.\-]*$#ui", $q1, $match);
+if (stripos($q1, " nach "))				// Wenn "nach", dann dürfen "-" in Start und Ziel enthalten sein
+	preg_match("#(([\pL\/ \-]+)( +nach +| +n +)([\pL\/ \-]+?)|([\pL\/]+) +([\pL\/]+))( *(\d{1,2})\.((\d{1,2})(\.)?(\d{2,4})?)?| (am )?(gestern|übermorgen|morgen|mo|di|mi|do|fr|sa|so)\pL*)?( *(auf|an)? *(\d{1,2}) *(h|uhr)?([,.: ](\d{1,2}))?)?[ \d\.\-]*$#ui", $q1, $match);
+else 
+	preg_match("#(([\pL\/ ]+)( *\- *| +nach +| +n +)([\pL\/ ]+?)|([\pL\/]+) +([\pL\/]+))( *(\d{1,2})\.((\d{1,2})(\.)?(\d{2,4})?)?| (am )?(gestern|übermorgen|morgen|mo|di|mi|do|fr|sa|so)\pL*)?( *(auf|an)? *(\d{1,2}) *(h|uhr)?([,.: ](\d{1,2}))?)?[ \d\.\-]*$#ui", $q1, $match);
 $start  = @$match[2] ? trim(@$match[2]) : trim(@$match[5]);
 $ziel   = @$match[4] ? trim(@$match[4]) : trim(@$match[6]);
 
-$keywords = ["bc", "bc25", "bc50", "bahncard", "bahncard25", "nah", "klasse", "rad", "lang", "best", "bestpreis", "bestpreise", "bpfern"];
+$keywords = ["bc", "bc25", "bc50", "bahncard", "bahncard25", "nah", "klasse", "rad", "lang", "langsam", "best", "bestpreis", "bestpreise", "bpfern", "prompt"];
+
+
 
 if (in_array(strtolower($q), ["start", "home", "info", "hilfe", "help"])) {
 	$q = "";
 	return $nachricht = "Hallo!";
 												// Speichere Variablen/Einstellungen
-} elseif (strpos($q, "=") || strpos($q, "-") === 0 || in_array(strtolower($q), $keywords)) {	
+} elseif (strpos($q, "=") || strpos($q, "-") === 0 || in_array(strtolower($q), $keywords)) {
 	$data = explode("=", $q);
 	$true = (count($data) == 1 || in_array($data[1], ["true", "wahr", "1"])) ? true : 
 			(in_array($data[1], ["false", "falsch", "0", ""]) ? false : null);
@@ -63,6 +68,8 @@ if (in_array(strtolower($q), ["start", "home", "info", "hilfe", "help"])) {
 			$key = "bc25";
 		elseif (in_array($keyi, ["best", "bestpreis"]))
 			$key = "Bestpreise";
+		elseif ($keyi == "lang")
+			$key = "langsam";
 		if ($true) {
 			cookie(strtoupper($key), "true");
 			$nachricht = "<i>$key</i> für zukünftige Suchen gespeichert. ";
@@ -74,6 +81,7 @@ if (in_array(strtolower($q), ["start", "home", "info", "hilfe", "help"])) {
 		if (!preg_match("#^[\pL]+$#ui", $key)) {
 			$nachricht = "Die Abkürzung darf nur Buchstaben enthalten!";
 		} else if ($true !== false) {
+			$value = str_replace("-", " ", $value);
 			cookie("station[$key]", $value);
 			$nachricht = "Bahnhof \"$value\" als \"$key\" abgespeichert.";
 		} else {
@@ -117,14 +125,14 @@ if (in_array(strtolower($q), ["start", "home", "info", "hilfe", "help"])) {
 	$station = json_decode($file)->stopPlaces;
 	$si1 = $start == strtoupper($start) ? 1 : 0;
 	if (!isset($station[$si1]))
-		return $nachricht = "Start nicht gefunden!";
+		return $nachricht = "Start nicht gefunden! ($start)";
 	$start = $station[$si1]->names->DE->nameLong;
 	
 	$file = file_get_contents("https://apis.deutschebahn.com/db-api-marketplace/apis/ris-stations/v1/stop-places/by-name/".urlencode($ziel), false, $context);
 	$station2 = json_decode($file)->stopPlaces;
 	$si2 = $ziel == strtoupper($ziel) ? 1 : 0;
 	if (!isset($station2[$si2]))
-		return $nachricht = "Ziel nicht gefunden!";
+		return $nachricht = "Ziel nicht gefunden! ($ziel)";
 	$ziel = $station2[$si2]->names->DE->nameLong;
 	
 	$bc25 	= aktiv("BC25", "(?i)bc25|(?i)bahncard|(?i)bc$");
@@ -173,7 +181,8 @@ if (in_array(strtolower($q), ["start", "home", "info", "hilfe", "help"])) {
 	if (aktiv("RAD", "(?i)fahrrad")) {
 		$r .= ",3:16:KLASSENLOS:1";
 		$rest .= "&fm=true";
-	}
+	} else 
+		$rest .= "&fm=false";
 	if ($nah)
 		$rest .= "&vm=03,04,05,06,07,08,09";
 	$rest .= "&Distanz=".round($dist)."km";
@@ -185,11 +194,13 @@ if (in_array(strtolower($q), ["start", "home", "info", "hilfe", "help"])) {
 	$zoid  = myUrlEncode("A=1@O=$ziel@X=$long@Y=$lat@U=80@L=$zoei@B=1@p=$time@");
 	$sotzot = "sot=ST&zot=ST";
 	
-	// echo "<br><br>Start: $start<br>Ziel: $ziel<br>Tag: $tag<br>Wochentag: $wotag<br>Monat: $monat.$jahr<br>Stunde: $stunde<br>Minute: $minute<br>Ankunft: $ankunft<pre>";
-	// var_dump($match);
-	// var_dump($station);
-	// var_dump($station2);
-	// exit;
+	if (aktiv("DEV")) {
+		echo "<br><br>Start: $start<br>Ziel: $ziel<br>Tag: $tag<br>Wochentag: $wotag<br>Monat: $monat.$jahr<br>Stunde: $stunde<br>Minute: $minute<br>Ankunft: $ankunft<pre>";
+		var_dump($match);
+		var_dump($station);
+		var_dump($station2);
+		exit;
+	}
 	
 	$hash = "sts=true&so=$so&zo=$zo&kl=$kl&r=$r&soid=$soid&zoid=$zoid&$sotzot&soei=$soei&zoei=$zoei&hd=$hd&$rest";
 	$url = "https://www.bahn.de/buchung/fahrplan/suche#$hash";

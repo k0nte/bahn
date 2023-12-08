@@ -17,20 +17,21 @@ if (isset($_GET["xq"]))
 			max-width: calc(95vw - 42px);
 			margin: auto;
 		}
-		body > div { 
+		body > div, footer, #opts > p { 
 			background: #fff3; 
 			margin: 30px auto; 
 			padding: 12px; width: 70%; 
-			font-size: 1.15em;
+			font-size: 1.1em;
 		}
-		a, a:visited { color: #23d}
+		footer a, footer a:visited {	color: #23d }
+		a:hover {						color: #34e }
 		#breit, #schmal { padding: 10px 50px; display: block }
 		#schmal { display: none }
 		@media (max-width:900px) { 
 			#schmal { display: block }
 			#breit  { display: none  }
 		}
-		span, #flex {
+		span, #flex, a {
 			font-size: 1.2em;
 			margin: auto;
 		}
@@ -62,6 +63,12 @@ if (isset($_GET["xq"]))
 			margin: 4px;
 			padding: 4px 8px;
 			display: inline-block;
+			color: #000;
+			text-decoration: none;
+		}
+		#opts > div {
+		  text-align: left;
+		  column-count: 2;
 		}
 	</style>
 </head>
@@ -76,21 +83,78 @@ if (isset($_GET["xq"]))
 			echo "<span style='font-size:1.4em; color:#800'>$nachricht</span>";
 		?>
 		<form action="./">
-			<input id="input" name="xq" style="width: 90%; max-width: 700px; margin: 10px; font-size: 1.2em; border-radius: 4px; padding: 9px" placeholder="Berlin Hamburg 19 Uhr" value="<?php if (isset($q)) echo $q ?>" />
-			<script>document.getElementById("input").focus()</script>
+			<input id="input" name="xq" style="width: 90%; max-width: 700px; margin: 10px; font-size: 1.2em; border-radius: 4px; padding: 9px" placeholder="<?php
+			$placeholders = [		"Berlin Hamburg Freitag 16 Uhr",
+									"München Leipzig morgen um 7",
+									"Düsseldorf Bremen Bahncard25",
+									"Köln Dortmund 18 Uhr Nahverkehr",
+									"Frankfurt Hannover am ".date("d.", time()+3600*24*5),
+									"Essen Stuttgart ".date("d.m.", time()+3600*24*7)." Bestpreise",
+									"Nürnberg Duisburg auf 19 Uhr",
+									"Dresden Leipzig 14:30"		];
+			echo $placeholders[array_rand($placeholders)];
+			?>" value="<?php if (isset($q)) echo $q ?>" />
+			<script>
+				// Get the input field and the initial placeholder text
+				var inputField = document.getElementById('input');
+				setTimeout(function() {
+					inputField.setAttribute('autofocus', 'autofocus');
+					inputField.click()
+					inputField.focus()
+				}, 100);
+				<?php if (isset($_COOKIE["PROMPT"])) { ?>
+					setTimeout(function() {
+						answer = prompt("Wo soll die Fahrt hingehen?")
+						if (answer != null) 
+							window.location = "?xq="+answer
+					}, 5)
+				<?php } ?>
+					
+				
+				var placeholder = inputField.getAttribute('placeholder');
+				// Clear the initial placeholder text
+				inputField.setAttribute('placeholder', '');
+
+				// Function to set the placeholder text character by character
+				function setPlaceholderText(index) {
+					inputField.setAttribute('placeholder', placeholder.substring(0, index));
+
+					if (index < placeholder.length) {
+						setTimeout(function () {
+							setPlaceholderText(index + 1);
+						}, 39); // Adjust the time interval to control the speed
+					}
+				}
+
+				// Call the function to start displaying the placeholder text character by character
+				setPlaceholderText(0);
+			</script>
 		</form>
 		<?php 
 		foreach ($_COOKIE as $id => $cookie) {
 			if ($id == "station") 
 				continue;
-			echo "<span class='opt'>$id</span>";
+			echo "<a class='opt' href='?xq=-$id' title='Entfernen'>$id</a>";
 		}
 		echo '<div style="display:inline-block;width:30px"></div>';
 		if (isset($_COOKIE["station"]))
 			foreach ($_COOKIE["station"] as $var => $station) {
-				echo "<span class='opt'>$var: $station</span>";
+				echo "<a class='opt' href='?xq=-$var' title='Entfernen'>$var: $station</a>";
 			}
 		?>
+		<div style="display:inline-block;width:30px"></div>
+		<a class='opt' href="#" onclick="document.getElementById('opts').style.display = 'block'; return false">⚙</a>
+		<div id="opts" style="display: none">
+			<p>Wähle Einstellungen, die für alle zukünftigen Suchen gespeichert werden. Willst du bei einer Suche die Einstellung ignorieren, schreibe „-EINSTELLUNG“ am Ende der Suchanfrage, also z.B. „-NAH“.</p>
+			<div>
+			<?php 
+				$opts = ["BC25" => "Bahncard 25", "NAH" => "Nur Nahverkehr", "BEST" => "Bestpreise", "RAD" => "Mit Fahrrad", "LANG" => "Auch langsame Verbindungen", "KLASSE" => "1. Klasse", "BPFERN" => "Bestpreise ab 120km außer bei NAH", "PROMPT" => "Zeige die Tastatur bei Mobilgeräten sofort"];
+				foreach ($opts as $key => $desc) {
+					echo "<a class='opt' href='?xq=$key'>$key:</a> $desc<br>";
+				}
+			?>
+			</div>
+		</div>
 	</div>
 	<div>
 		<h1>Mögliche Eingaben</h1>
@@ -122,15 +186,9 @@ Münster Frankfurt</b></code></div>
 			<div><code><b>Rostock nach Hamburg Freitag 16h NAH</b>  <i>= nächsten Freitag um 16 Uhr im Nahverkehr</i>
 <b>B S 2. 15 bc</b> <i>= Berlin nach Stuttgart am 2. um 15 Uhr mit Bahncard25</i></code>
 			</div>
-			<div>Speichern für zukünftige Suchen</div>
-			<div><code><b>BC25</b> / <b>NAH</b> / <b>BEST</b> / <b title="Bestpreise ab 120km Entfernung außer bei NAH">BPFERN</b> / <b>RAD</b> / …
-<i>Nur einen Befehl eintippen; dieser wird für zukünftige Suchen gespeichert.</i>
-
-<b>var = Lüchtringen</b>
-<i>Der Bahnhof wird unter „var“ gespeichert und kann bei zukünftigen Suchen verwendet werden.</i>
-
-<b>-BC25</b> / …    <i>= Einstellung/Bahnhof entfernen</i>
-</code>
+			<div>Bahnhöfe speichern</div>
+			<div><code><b>var = Baunatal Guntershausen</b>
+<i>Der Bahnhof „Baunatal Guntershausen“ wird als „var“ für zukünftige Suchen gespeichert.</i></code>
 			</div>
 			<div>Weitere Suchen</div>
 			<div><code><b>ICE 722</b>      <i>= Zuginformationen</i>
@@ -140,14 +198,15 @@ Münster Frankfurt</b></code></div>
 		</div>
 	</div>
 	<div>
-		<h1>Tipp</h1>
-		<span id="breit">Klicke Rechtsklick auf das Suchfeld und dann „Suchmaschine hinzufügen“ o.ä. – dadurch kannst du direkt über deinen Browser diese Suche benutzen.</span>
-		<span id="schmal">Tippe auf das Suchfeld und halte gedrückt – dort findest du eine Option, um diese Suche als Suchmaschine zu deinem Browser hinzuzufügen.</span>
+		<h1>Tipps</h1>
+		<p><span id="breit">Klicke Rechtsklick auf das Suchfeld und dann „Suchmaschine hinzufügen“ o.ä. – dadurch kannst du direkt über deinen Browser diese Suche benutzen.</span>
+		<span id="schmal">Tippe auf das Suchfeld und halte gedrückt – dort findest du eine Option, um diese Suche als Suchmaschine zu deinem Browser hinzuzufügen.</span></p>
+		<p><span>Um herauszufinden, wie pünktlich ein Zug im letzten Monat war, kopiere die Zugkennung aus deinen Bahnergebnissen. Bei Regionalbahnen ist dies die lange Zahl unter Details, z.B. 10266 für RB 38.</span></p> 
 	</div>
-	<div>
+	<footer>
 		<h1>Urheber</h1>
 		<a href="http://ummen.tk/">Konstantin Ummen</a> | <a href="https://github.com/k0nte/bahn" target="_blank">Github</a>
-	</div>
+	</footer>
 		
 </body>
 </html>
