@@ -1,4 +1,6 @@
 # Bahnu
+[Über eine Spende würde ich mich freuen!](https://paypal.me/ummen)
+
 
 ## Bekannte Probleme
 
