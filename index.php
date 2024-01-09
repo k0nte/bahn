@@ -81,6 +81,8 @@ if (isset($_GET["xq"]))
 		<?php 
 		if ($nachricht)
 			echo "<span style='font-size:1.4em; color:#800'>$nachricht</span>";
+		
+		/*<?php if (isset($_COOKIE["session"]) AND (isset($_COOKIE["BPFERN"]) OR isset($_COOKIE["BEST"]))) { ?>onsubmit="close()" <?php } ?>*/
 		?>
 		<form action="./">
 			<input id="input" name="xq" style="width: 90%; max-width: 700px; margin: 10px; font-size: 1.2em; border-radius: 4px; padding: 9px" placeholder="<?php
@@ -132,7 +134,7 @@ if (isset($_GET["xq"]))
 		</form>
 		<?php 
 		foreach ($_COOKIE as $id => $cookie) {
-			if ($id == "station") 
+			if (in_array($id, ["station", "session"]))
 				continue;
 			echo "<a class='opt' href='?xq=-$id' title='Entfernen'>$id</a>";
 		}
@@ -143,26 +145,29 @@ if (isset($_GET["xq"]))
 			}
 		?>
 		<div style="display:inline-block;width:30px"></div>
-		<a class='opt' href="#" onclick="document.getElementById('opts').style.display = 'block'; return false">⚙</a>
-		<div id="opts" style="display: none">
-			<p>Wähle Einstellungen, die für alle zukünftigen Suchen gespeichert werden. Willst du bei einer Suche die Einstellung ignorieren, schreibe „-EINSTELLUNG“ am Ende der Suchanfrage, also z.B. „-NAH“.</p>
+		<a class='opt' href="#" onclick="document.getElementById('opts').hidden = !document.getElementById('opts').hidden; return false">⚙</a>
+		<div id="opts">
+			<p>Wähle Einstellungen, die für alle zukünftigen Suchen gespeichert werden. Willst du bei einer Suche die Einstellung ignorieren, schreibe „-Einstellung“, also z.B. „-nah“.</p>
 			<div>
 			<?php 
 				$opts = ["BC25" => "Bahncard 25", "NAH" => "Nur Nahverkehr", "BEST" => "Bestpreise", "RAD" => "Mit Fahrrad", "LANG" => "Auch langsame Verbindungen", "KLASSE" => "1. Klasse", "BPFERN" => "Bestpreise ab 120km außer bei NAH", "PROMPT" => "Zeige die Tastatur bei Mobilgeräten sofort"];
 				foreach ($opts as $key => $desc) {
-					echo "<a class='opt' href='?xq=$key'>$key:</a> $desc<br>";
+					echo "<a class='opt' href='?xq=$key'>$key</a> $desc<br>";
 				}
 			?>
 			</div>
 		</div>
+		<script>
+			document.getElementById('opts').hidden = true
+		</script>
 	</div>
 	<div>
 		<h1>Mögliche Eingaben</h1>
 		<div id="flex">
 			<div>Von A nach B</div>
 			<div><code><b>Münster nach Frankfurt
-Münster Nord-Frankfurt Süd
-Münster Frankfurt</b></code></div>
+Münster Frankfurt
+Münster Nord Frankfurt Süd</b></code></div>
 			<div>KFZ-Kennzeichen</div>
 			<div><code><b>ms f</b>         <i>= Münster nach Frankfurt</i></code></div>
 			<div>Zeitpunkt</div>
@@ -175,15 +180,15 @@ Münster Frankfurt</b></code></div>
 			</div>
 			<div>Einstellungen<!--<br>(werden für nächsten <br>Aufruf gespeichert)--></div>
 			<div>
-				<code><b>bahncard25</b> / <b>bc25</b>   <i>= mit Bahncard 25</i>
-<b>Nahverkehr</b> / <b>NAH</b>    <i>= nur Nahverkehr</i>
-<b>Bestpreise</b> / <b>BEST</b>   <i>= Bestpreise anzeigen</i>
-<b>Fahrrad</b> / <b>RAD</b>       <i>= mit Fahrrad</i>
-<b>Langsam</b> / <b>LANG</b>      <i>= auch langsame Verb.</i>
+				<code><b>Bahncard25</b> / <b>bc</b>     <i>= mit Bahncard 25</i>
+<b>Nahverkehr</b> / <b>nah</b>    <i>= nur Nahverkehr</i>
+<b>Bestpreise</b> / <b>best</b>   <i>= Bestpreise anzeigen</i>
+<b>Fahrrad</b>    / <b>rad</b>    <i>= mit Fahrrad</i>
+<b>Langsam</b>    / <b>lang</b>   <i>= auch langsame Verb.</i>
 <b>Klasse</b>              <i>= 1. Klasse</i></code>
 			</div>
 			<div>Beispiele</div>
-			<div><code><b>Rostock nach Hamburg Freitag 16h NAH</b>  <i>= nächsten Freitag um 16 Uhr im Nahverkehr</i>
+			<div><code><b>Rostock nach Hamburg Freitag 16h Nah</b>  <i>= nächsten Freitag um 16 Uhr im Nahverkehr</i>
 <b>B S 2. 15 bc</b> <i>= Berlin nach Stuttgart am 2. um 15 Uhr mit Bahncard25</i></code>
 			</div>
 			<div>Bahnhöfe speichern</div>
@@ -199,13 +204,14 @@ Münster Frankfurt</b></code></div>
 	</div>
 	<div>
 		<h1>Tipps</h1>
-		<p><span id="breit">Klicke Rechtsklick auf das Suchfeld und dann „Suchmaschine hinzufügen“ o.ä. – dadurch kannst du direkt über deinen Browser diese Suche benutzen.</span>
+		<p><span id="breit" title="URL: https://bahn.ummen.tk/?xq=%s">Klicke Rechtsklick auf das Suchfeld und dann „Suchmaschine hinzufügen“ o.ä. – dadurch kannst du direkt über deinen Browser diese Suche benutzen.</span>
 		<span id="schmal">Tippe auf das Suchfeld und halte gedrückt – dort findest du eine Option, um diese Suche als Suchmaschine zu deinem Browser hinzuzufügen.</span></p>
 		<p><span>Um herauszufinden, wie pünktlich ein Zug im letzten Monat war, kopiere die Zugkennung aus deinen Bahnergebnissen. Bei Regionalbahnen ist dies die lange Zahl unter Details, z.B. 10266 für RB 38.</span></p> 
 	</div>
 	<footer>
 		<h1>Urheber</h1>
-		<a href="http://ummen.tk/">Konstantin Ummen</a> | <a href="https://github.com/k0nte/bahn" target="_blank">Github</a>
+		<a href="http://ummen.tk/">Konstantin Ummen</a> | <a href="https://github.com/k0nte/bahn">Github</a><br>
+		<pre style="font-size: 1.1em">http://bahn.ummen.tk/?xq=[Suchwert]</pre>
 	</footer>
 		
 </body>
