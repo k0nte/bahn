@@ -6,3 +6,5 @@
 
 Bestpreise funktionieren nur einmal pro Tab-Session. Beim zweiten Mal werden Start und Ziel der vorherigen Suche beibehalten. Ein neuer Tab muss geöffnet werden, um das Problem zu umgehen, oder man klickt beim Bahn-Suchergebnis hin und her.
 Eine bahn.de-interne Weiterleitung scheint nötig zu sein. Per Javascript einen neuen Tab zu öffnen wird von Browsern nicht mehr unterstützt.
+
+MI (Minden), DO (Dortmund), FR (Freiburg), SO (Soest) werden als Wochentage erkannt.
