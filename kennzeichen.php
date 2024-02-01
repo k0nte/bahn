@@ -1,4 +1,9 @@
 <?php
+$ersetzungen = [
+	"höxter" => "Höxter Rathaus",
+	"rothenburg" => "Rothenburg ob der Tauber bahnhof",
+];
+$uc_only = ["bad", "ob"];
 $kennzeichen = ["A" => "Augsburg",
 "AA" => "Aalen Ostalbkreis",
 "AB" => "Aschaffenburg",
@@ -226,7 +231,7 @@ $kennzeichen = ["A" => "Augsburg",
 "MN" => "Mindelheim",
 "MOL" => "Märkisch-Oderland",
 "MOS" => "Mosbach",
-"MR" => "Marburg-Biedenkopf",
+"MR" => "Marburg",
 "MS" => "Münster",
 "MSH" => "Mansfeld-Südharz",
 "MSP" => "Main-Spessart-Kreis",
