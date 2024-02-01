@@ -1,4 +1,5 @@
 <?PHP
+// $betriebsstellen starting at line 681
 $leitpunkte = [
 "A" => "Augsburg Hbf",
 "AA" => "Aalen",
@@ -675,39 +676,9 @@ $leitpunkte = [
 "ZI" => "Zittau",
 "ZME" => "Zella-Mehlis",
 "ZS" => "Zossen",
-"ZZ" => "Zeitz",
+"ZZ" => "Zeitz"];
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+$betriebsstellen = [
 "XBHBK" => "Hansbeke",
 "XBHBS" => "Hambos",
 "XBHBY" => "Habay",
@@ -6795,7 +6766,7 @@ $leitpunkte = [
 "BPIL" => "Pillgram",
 "BPILF" => "Pillgram Feuerwehr",
 "BPILS" => "Pillgram Schulstraße",
-"BPK" => "Kostrzyn (PL) entspricht XPK",
+"BPK" => "Kostrzyn (PL)",
 "BPKR" => "Berlin-Pankow",
 "BPKW" => "Berlin-Pankow S-Bahn",
 "BPL" => "Preilack",
@@ -6960,7 +6931,7 @@ $leitpunkte = [
 "BPRS" => "Berlin Priesterweg",
 "BPW" => "Prösen-Wainsdorf / Prösen Ost",
 "BPWA" => "Berlin Plänterwald",
-"BPWE" => "Wegliniec (PL) entspricht XPWE",
+"BPWE" => "Wegliniec (PL)",
 "BPZ" => "Peickwitz Streckenw 6198/6199",
 "BPZL" => "Prötzel",
 "BQAH" => "Ahrensfelde BE/BB",
@@ -7066,7 +7037,7 @@ $leitpunkte = [
 "ADL" => "Dahlenburg",
 "ADM" => "Dagebüll Mole",
 "ADO" => "Dorum",
-"ADPA" => "Padborg DB (DK) entspricht XDPA",
+"ADPA" => "Padborg DB (DK)",
 "ADR" => "Dollern",
 "ADS" => "Deinste",
 "ADS K" => "Deinste Kleinbf",
@@ -9646,8 +9617,8 @@ $leitpunkte = [
 "DTAM" => "Thalheim (Erzgeb) Mitte",
 "DTAN" => "Tannenbergsthal (Vogtl)",
 "DTB" => "Taubenheim (Spree)",
-"DTD" => "Decin hl.n (CZ) entspricht XTD",
-"DTDV" => "Decin Vychod Ga DB (CZ) entspricht XTDV",
+"DTD" => "Decin hl.n (CZ)",
+"DTDV" => "Decin Vychod Ga DB (CZ)",
 "DTF" => "Teufelsmühle",
 "DTFL" => "Thoßfell",
 "DTFN" => "Tiefenau",
@@ -9804,7 +9775,7 @@ $leitpunkte = [
 "FOPX" => "Oppenheim ESTW-Z",
 "FOR" => "Bad Orb",
 "FOR A" => "Bad Orb Aumühle",
-"DTV" => "Vojtanov (CZ) entspricht XTV",
+"DTV" => "Vojtanov (CZ)",
 "DTW" => "Teichwolframsdorf",
 "DTZ" => "Trünzig",
 "DUD" => "Ulbersdorf",
@@ -12134,7 +12105,7 @@ $leitpunkte = [
 "KNRC" => "Neuss Rheinparkcenter",
 "KNS" => "Niederseßmar",
 "KNSD" => "Neuss S�d",
-"KNVL" => "Venlo (NL) entspricht XNVL",
+"KNVL" => "Venlo (NL)",
 "KNZS" => "Niederzissen",
 "KOB" => "Heinsberg-Oberbruch",
 "KOCH" => "Ochtendung",
@@ -17212,7 +17183,7 @@ $leitpunkte = [
 "NCH S" => "Cham (Oberpf) Schwedenschanze",
 "NCHA" => "Chamerau",
 "NCHM" => "Cham Müll",
-"NCHX" => "Cheb (CZ) entspricht XTCH",
+"NCHX" => "Cheb (CZ)",
 "NCL" => "Creglingen",
 "NCN" => "Coburg Nord",
 "NCNS" => "Coburg-Neuses",
@@ -17711,7 +17682,7 @@ $leitpunkte = [
 "MKRR" => "Kraftisried",
 "MKRS" => "Krumbach (Schwab) Schule",
 "MKS" => "Königssee",
-"MKU" => "Kufstein (AT) entspricht XAKN",
+"MKU" => "Kufstein (AT)",
 "MKUN" => "Kutzenhausen",
 "MKW" => "Kirchweidach",
 "MKZ" => "Kreuzstraße",
@@ -18731,7 +18702,7 @@ $leitpunkte = [
 "SAL" => "Alken (Schiff)",
 "SALG" => "Altenglan",
 "SAM" => "Auersmacher",
-"SAPX" => "Apach (FR) entspricht XFAP",
+"SAPX" => "Apach (FR)",
 "SARL" => "Argenthal",
 "SAUW" => "Auw an der Kyll",
 "SAZ" => "Alsenz",
@@ -19144,7 +19115,7 @@ $leitpunkte = [
 "SET" => "Etzenhofen",
 "SEU" => "Trier-Euren",
 "SEW" => "Eiweiler",
-"SFBX" => "Forbach (FR) entspricht XFFB",
+"SFBX" => "Forbach (FR)",
 "SFC" => "Fischbach-Camphausen",
 "SFF" => "Fremersdorf",
 "SFFH" => "Frankfurt-Hahn Flughafen",
@@ -19819,7 +19790,7 @@ $leitpunkte = [
 "RBANN" => "Blankenloch Nord",
 "RBAR" => "Bahlingen Riedlen",
 "RBAS" => "Bashaide",
-"RBAX" => "Basel SBB RB (CH) entspricht XSBR",
+"RBAX" => "Basel SBB RB (CH)",
 "RBB" => "Baden-Baden",
 "RBBC" => "Bauerbach",
 "RMWT" => "Mannheim-Wallstadt",
@@ -21903,7 +21874,7 @@ $leitpunkte = [
 "WPSD" => "Pisede",
 "WPSG" => "Passow DB-Grenze",
 "WPSN" => "Pessin",
-"WPSU" => "Szczecin-Gumience (Pl) entspricht XPSU",
+"WPSU" => "Szczecin-Gumience (Pl)",
 "WPSW" => "Plüschow",
 "WPT" => "Pantelitz",
 "WPTW" => "Placht Weiler",
