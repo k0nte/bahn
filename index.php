@@ -98,7 +98,7 @@ if (isset($_GET["xq"]))
 			<p>Wähle Einstellungen, die für alle zukünftigen Suchen gespeichert werden. Willst du bei einer Suche die Einstellung ignorieren, schreibe „-Einstellung“, also z.B. „-nah“.</p>
 			<div>
 			<?php 
-				$opts = ["BC25|BC50" => "Bahncard", "BEST|BPFERN" => "Bestpreise (BPFERN: ab 120km außer bei NAH)", "NAH" => "Nur Nahverkehr", "RAD" => "Mit Fahrrad", "LANG" => "Auch langsame Verbindungen", "KLASSE" => "1. Klasse", "DIREKT" => "Nur Direktverbindungen", "PROMPT" => "Zeige die Tastatur bei Mobilgeräten sofort"];
+				$opts = ["BC25|BC50" => "Bahncard", "Best|BPFern" => "Bestpreise (BPFern: ab 120km)", "Nah|Fern" => "Nur Nah-/Fernverkehr", "Rad" => "Mit Fahrrad", "Lang" => "Auch langsame Verbindungen", "Klasse" => "1. Klasse", "Direkt" => "Nur Direktverbindungen", "Prompt" => "Zeige die Tastatur bei Mobilgeräten sofort", "Leitpunkt" => "Suche vorrangig nach Leitpunkten", "Betriebsstelle" => "Suche vorrangig nach Betriebsstellen"];
 				foreach ($opts as $key => $desc) {
 					$keys = explode("|", $key);
 					foreach ($keys as $k)
@@ -120,7 +120,8 @@ if (isset($_GET["xq"]))
 Münster Frankfurt
 Münster Nord Frankfurt Süd</b></code></div>
 			<div>KFZ-Kennzeichen</div>
-			<div><code><b>ms f</b>         <i>= Münster nach Frankfurt</i></code></div>
+			<div><code><b>ms f</b>         <i>= Münster nach Frankfurt
+(Manche Abk. müssen großgeschrieben werden, z.B. BAD)</i></code></div>
 			<div>Zeitpunkt</div>
 			<div>
 				<code><b>Köln Bonn Dienstag</b>  <i>= nächsten Dienstag</i>
@@ -131,7 +132,7 @@ Münster Nord Frankfurt Süd</b></code></div>
 			</div>
 			<div>Einstellungen<!--<br>(werden für nächsten <br>Aufruf gespeichert)--></div>
 			<div>
-				<code><b>Bahncard25</b> / <b>bc25</b>     <i>= mit Bahncard 25</i>
+				<code><b>Bahncard25</b> / <b>bc25</b>   <i>= mit Bahncard 25</i>
 <b>Nahverkehr</b> / <b>nah</b>    <i>= nur Nahverkehr</i>
 <b>Bestpreise</b> / <b>best</b>   <i>= Bestpreise anzeigen</i>
 <b>Fahrrad</b>    / <b>rad</b>    <i>= mit Fahrrad</i>
@@ -139,8 +140,8 @@ Münster Nord Frankfurt Süd</b></code></div>
 <b>Klasse</b>              <i>= 1. Klasse</i></code>
 			</div>
 			<div>Beispiele</div>
-			<div><code><b>Rostock nach Hamburg Freitag 16h Nah</b>  <i>= nächsten Freitag um 16 Uhr im Nahverkehr</i>
-<b>B S 2. 15 bc25</b> <i>= Berlin nach Stuttgart am 2. um 15 Uhr mit Bahncard25</i></code>
+			<div><code><b>Rostock nach Hamburg 7. 16h Nah</b>  <i>= am 7. des (nächsten) Monats um 16 Uhr im Nahverkehr</i>
+<b>b f flughafen fr 15 bc25</b> <i>= Berlin nach Frankfurt Flughafen am Freitag um 15 Uhr mit Bahncard25</i></code>
 			</div>
 			<div>Bahnhöfe speichern</div>
 			<div><code><b>var = Baunatal Guntershausen</b>
@@ -167,6 +168,7 @@ Münster Nord Frankfurt Süd</b></code></div>
 			Ich würde mich über eine kleine <a href="https://paypal.me/ummen">Spende über Paypal</a> freuen!
 		</p>
 		<div>
+		Diese Website erhebt keine personenbezogenen Daten.<br>
 		Anfragen heute: 
 			<?php
 			require_once "db_api.php";
