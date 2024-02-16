@@ -1,6 +1,6 @@
 ﻿<?php
 $nachricht = "";
-			$heute = mktime(0,0,0);
+$heute = mktime(0,0,0);
 if (isset($_GET["xq"]))
 	require "redirect.php";
 ?>
@@ -9,6 +9,7 @@ if (isset($_GET["xq"]))
 	<title>Bahnsuche</title>
 	<meta name="viewport" content="width=device-width, initial-scale=0.75, minimum-scale=0.75">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<?php if (isset($meta)) echo $meta ?>
 	<link rel="stylesheet" href="style.css">
 </head>
 <body style="background: linear-gradient(177deg, rgba(198,106,126,1) 0%, rgba(212,160,198,1) 35%, rgba(255,207,192,1) 100%); width:100%;
@@ -141,7 +142,10 @@ Münster Nord Frankfurt Süd</b></code></div>
 			</div>
 			<div>Beispiele</div>
 			<div><code><b>Rostock nach Hamburg 7. 16h Nah</b>  <i>= am 7. des (nächsten) Monats um 16 Uhr im Nahverkehr</i>
-<b>b f flughafen fr 15 bc25</b> <i>= Berlin nach Frankfurt Flughafen am Freitag um 15 Uhr mit Bahncard25</i></code>
+			
+<b>b f flughafen fr 15 bc25</b> <i>= Berlin nach Frankfurt Flughafen am Freitag um 15 Uhr mit Bahncard25</i>
+
+<b>b k über bn 2h30m</b> <i>= Berlin—Köln über Bonn, Aufenthaltsdauer 2:30 Stunden</i></code>
 			</div>
 			<div>Bahnhöfe speichern</div>
 			<div><code><b>var = Baunatal Guntershausen</b>

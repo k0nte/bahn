@@ -65,7 +65,7 @@ $stationen = [[], []];
 $q = urldecode($_GET["xq"]);
 $ql = strtolower($q);
 file_put_contents("anfragen.log", date("y-m-d H:i:s   "). $q."\n", FILE_APPEND);
-$props = ["bc", "bc25", "bc50", "bc100", "bahncard", "bahncard25", "bahncard50", "bahncard100", "nah", "klasse", "1.klasse", "klasse1", "klasse2", "rad", "lang", "langsam", "best", "bestpreis", "bestpreise", "bpfern", "prompt", "dev", "dev2", "kalender", "kalendar", "calendar", "fern", "fernverkehr", "direkt", "leitpunkt", "l:", "betriebsstelle", "b:"];
+$props = ["bc", "bc25", "bc50", "bc100", "bahncard", "bahncard25", "bahncard50", "bahncard100", "nah", "klasse", "1.klasse", "klasse1", "klasse2", "rad", "lang", "langsam", "best", "bestpreis", "bestpreise", "bp", "bpfern", "prompt", "dev", "dev2", "kalender", "kalendar", "calendar", "fern", "fernverkehr", "direkt", "leitpunkt", "l:", "betriebsstelle", "b:"];
 
 
 if (in_array($ql, ["start", "home", "info", "hilfe", "help", "?", " ", ""])) {
@@ -156,6 +156,7 @@ $minute = date("i");
 $weekday = $date = false;
 $start = $ziel = null;
 $divide = $count = $bc = 0;
+$aufenthalt = [];
 $ankunft = "D";
 
 $keywords = preg_split("#[\s\-]+#", $q);
@@ -164,7 +165,7 @@ foreach ($keywords as $i => $k) {
 	$k = strtolower($kcase);
 	$kgross = $kcase == strtoupper($kcase);
 	switch ($k) {
-		case "": case "uhr": case "am": case "um": case "ab": case "jetzt": case "aktuell": case "abfahrt": case "bahnu": // case "der": 
+		case "": case "uhr": case "am": case "um": case "ab": case "jetzt": case "aktuell": case "abfahrt": case "bahnu": case "aufenthalt": case "aufenthaltsdauer": // case "der": 
 			if (!$kgross)					continue 2;
 			break;
 		case "auf": case "an": case "ankunft":
@@ -172,6 +173,8 @@ foreach ($keywords as $i => $k) {
 			$ankunft = "A";					continue 2;
 		case "nach":
 			$divide = 1;					continue 2;
+		case "über": case "via": 
+			$divide = $divide > 1 ? $divide + 1 : 2;	continue 2;
 		case "mo": case "di": case "mi": case "do": case "fr": case "sa": case "so": 
 			if ($i < 2 || $kgross)			break;
 		case "montag": case "dienstag": case "mittwoch": case "donnerstag": case "freitag": case "samstag": case "sonntag": case "mon": case "die": case "mit": case "don": case "fri": case "sam": case "son":
@@ -196,6 +199,9 @@ foreach ($keywords as $i => $k) {
 			$jahr   = isset($match[5]) ? (strlen($match[5]) == 2 ? "20$match[5]" : $match[5])
 					: ( $monat < date("m") ? date("Y")+1 : date("Y") );
 			$date = true;
+		} elseif ($divide > 1 && preg_match("#(\d{1,2}h)?(\d{1,2}m)|(\d{1,2}h)$#", $k, $match)) {
+			// Aufenthaltsdauer für "über"
+			$aufenthalt[$divide] = (intval($match[1]) + (isset($match[3]) ? intval($match[3]) : 0)) * 60 + intval($match[2]);
 		} else {																		// Uhrzeit ohne .
 			if (isset($uhrzeit) && !isset($uhrzeit[3]))
 				$minute = $match2[0];
@@ -223,20 +229,16 @@ foreach ($keywords as $i => $k) {
 				require_once "punkte.php";
 				if (isset($leitpunkte[strtoupper($parts[1])]))
 					$s = $leitpunkte[strtoupper($parts[1])];
-				else 
-					$kcase = $s = $parts[1];
 				break;
 			case "b":
 				require_once "punkte.php";
 				if (isset($betriebsstellen[strtoupper($parts[1])]))
 					$s = $betriebsstellen[strtoupper($parts[1])];
-				else 
-					$kcase = $s = $parts[1];
 				break;
 		}
 	} else if (isset($ersetzungen[$k]))
 		$s = $ersetzungen[$k];
-	$stationen[$divide][$kcase] = str_replace(["+", "#", ".", ","], "", $s);
+	$stationen[$divide][] = str_replace(["+", "#", ".", ","], "", $s);
 }
 
 if (!$date AND mktime($stunde, $minute) < $time)
@@ -245,13 +247,17 @@ if ($weekday)		$date = $weekday + $stunde*3600+$minute*60;
 else				$date = mktime($stunde, $minute, 0, $monat, $tag, $jahr);
 
 
+$stationen_raw = $stationen;
 require "re_check.php";
 if (aktiv(["leitpunkt", "l:"]) == 2 AND 	  (check_list("L") || check_list("B"))) {		// Eingabe vor Cookie Betriebsstelle
 } elseif (aktiv(["betriebsstelle", "b:"]) AND (check_list("B") || check_list("L"))) {		// nix
 } elseif (aktiv(["leitpunkt", "l:"]) AND 	  (check_list("L") || check_list("B"))) {		// nix
 } elseif (empty($stationen[1])) {
+	$stationen_temp = $stationen[0];
 	check_list("K");
 	check($stationen[0]);
+	if (!$start && !$ziel)
+		check($stationen_temp); // ohne Umwandlung in Abkürzungen
 } else {
 	check_list("K");
 	check_with_ziel($stationen);
@@ -297,11 +303,28 @@ if ($ziel && $start != $ziel) {								// Fahrplanauskunft
 		case 100:	$r = "13:24:KLASSE_$kl:1";		break;
 		default:	$r = "13:16:KLASSENLOS:1";
 	}
-	$nah  = aktiv(["NAH", "nahverkehr"], ["FERN", "fernverkehr"]);
-	$rest = "hza=$ankunft&ar=false&hz=%5B%5D";
-	$rest .= aktiv("direkt") ? "&d=true" : "&d=false";
+	function bahnhofID($ort, $long, $lat, $id, $noencode = false) {
+		global $time;
+		$long = str_replace(".", "", $long);
+		$lat  = str_replace(".", "", $lat);
+		$text = "A=1@O=$ort@X=$long@Y=$lat@U=80@L=$id@B=1@p=$time@";
+		return $noencode ? $text : myUrlEncode($text);
+	}
+	$hz = [];
+	foreach ($stationen as $i => $ueber) {
+		if ($i < 2 || $i > 3) continue;  // max. 2 Zwischenhalte
+		$n = join(" ", $ueber);
+		$name = station($n);
+		$zeit = isset($aufenthalt[$i]) ? $aufenthalt[$i] : 10;
+		$hz[] = [bahnhofID($name, $station[$n]->position->longitude, $station[$n]->position->latitude, $station[$n]->evaNumber, true), 
+				$name, $zeit];
+	}
+	$rest = "hza=$ankunft&hz=".myUrlEncode(json_encode($hz, JSON_UNESCAPED_UNICODE))."&ar=false";
 	$rest .= aktiv(["LANG", "langsam"]) ? "&s=false" : "&s=true";
-	$bp = (!$nah && $dist > 120 && aktiv("BPFERN")) || aktiv(["BESTPREISE", "bestpreis", "BEST"]);
+	$rest .= aktiv("direkt") ? "&d=true" : "&d=false";
+	$nah  = aktiv(["NAH", "nahverkehr"], ["FERN", "fernverkehr"]);
+	$bp = strtotime("tomorrow") <= $date 		// Bestpreise nicht für gleichen Tag verfügbar
+		&& ((!$nah && $dist > 120 && aktiv("BPFERN")) || aktiv(["BESTPREISE", "bestpreis", "BEST", "bp"]));
 	$rest .= $bp ? "&bp=true" : "&bp=false";
 	if (aktiv(["RAD", "fahrrad"])) {
 		$r .= ",3:16:KLASSENLOS:1";
@@ -310,16 +333,15 @@ if ($ziel && $start != $ziel) {								// Fahrplanauskunft
 		$rest .= "&fm=false";
 	if ($nah)
 		$rest .= "&vm=03,04,05,06,07,08,09";
-	$long = str_replace(".", "", $long1);
-	$lat  = str_replace(".", "", $lat1);
-	$soid = myUrlEncode("A=1@O=$start@X=$long@Y=$lat@U=80@L=$soei@B=1@p=$time@");
-	$long = str_replace(".", "", $long2);
-	$lat  = str_replace(".", "", $lat2);
-	$zoid  = myUrlEncode("A=1@O=$ziel@X=$long@Y=$lat@U=80@L=$zoei@B=1@p=$time@");
-	$sotzot = "sot=ST&zot=ST";
+	$soid = bahnhofID($start, $long1, $lat1, $soei);
+	$zoid = bahnhofID($ziel, $long2, $lat2, $zoei);
 	
+	
+	$hash = "Distanz=".round($dist)."km&sts=true&so=$so&zo=$zo&kl=$kl&r=$r&soid=$soid&zoid=$zoid&sot=ST&zot=ST&soei=$soei&zoei=$zoei&hd=$hd&$rest";
+	$url = "https://www.bahn.de/buchung/fahrplan/suche#$hash";
+
 	if (aktiv("DEV")) {
-		echo "<br> $q<br><br>Start: $start<br>Ziel: $ziel<br>Tag: $tag<br>Monat: $monat.$jahr<br>Stunde: $stunde<br>Minute: $minute<br>Ankunft: $ankunft, Bahncard: $bc, heute: $heute<br>Ausführungszeit: ";
+		echo "<br> $q<br><br>Start: $start<br>Ziel: $ziel<br>Tag: $tag<br>Monat: $monat.$jahr<br>Stunde: $stunde<br>Minute: $minute<br>Ankunft: $ankunft, Bahncard: $bc, <br>heute: $heute, date: $date, morgen: ".strtotime("tomorrow")."<br>$url<br>Ausführungszeit: ";
 		echo round((microtime(true) - $time2)*1000) ."ms\n<pre>";
 		echo date("H:i:s, y-m-d\\\n", $date);
 		print_r($stationen);
@@ -328,13 +350,17 @@ if ($ziel && $start != $ziel) {								// Fahrplanauskunft
 		exit;
 	}
 	
-	$hash = "Distanz=".round($dist)."km&sts=true&so=$so&zo=$zo&kl=$kl&r=$r&soid=$soid&zoid=$zoid&$sotzot&soei=$soei&zoei=$zoei&hd=$hd&$rest";
-	$url = "https://www.bahn.de/buchung/fahrplan/suche#$hash";
-	
-	setcookie("session", "true");
+	setcookie("session", $q.time());
 	// if ($bp && isset($_COOKIE["session"]))
 		// exit ('<script>window.open("'.$url.'","_blank")</script>');
-	header("Location: $url");
+	header("Location: $url", true, 301);
+	// $meta = '<script>
+	// caches.match(window.location.href).then(function(response) { 
+		// if (response) 			alert("yess")
+		// else					alert("noo")
+		// } )
+	// window.history.pushState({page: window.location.href}, "", window.location.href);
+    // window.location.href = "'.$url.'";</script>';
 	exit;
 } else {										// Bahnhof
 	if (aktiv(["DEV", "dev2"])) {
