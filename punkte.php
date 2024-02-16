@@ -24235,5 +24235,5 @@ $betriebsstellen = [
 "XAPV" => "Pill-Vomperbach",
 "XAPW" => "Pörtschach am Wörthersee"];
 
-echo 24231 - count($leitpunkte);
+// echo 24231 - count($leitpunkte);
 ?>

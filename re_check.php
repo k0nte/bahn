@@ -28,7 +28,7 @@ function station($name, $fertig = false) {
 	elseif ($fertig == "ziel")
 		$ziel_station = $s;
 	
-	echo "<br>$name: ".$s->names->DE->nameLong;
+	// echo "<br>$name: ".$s->names->DE->nameLong;
 	return $s->names->DE->nameLong;
 }
 
@@ -57,7 +57,7 @@ function check($list) {
 			if ($value > $highest_proba) {
 				$highest_proba = $value;
 				$j = $i;
-				echo "$j $name1 — $name2: $value, ".round($proba[$s],2)."|".round($proba[$z],2);
+				echo "<br>$name1 — $name2: $value, ".round($proba[$s],2)."|".round($proba[$z],2);
 			}
 		}
 	}
@@ -85,7 +85,7 @@ function check_with_ziel($stationen) {
 }
 
 function check_list($art) {
-	global $stationen, $start, $ziel, $leitpunkte, $betriebsstellen, $kennzeichen, $uc_only;
+	global $stationen, $stationen_raw, $start, $ziel, $leitpunkte, $betriebsstellen, $kennzeichen, $uc_only;
 	require_once "punkte.php";
 	$found = 0;
 	switch ($art) {
@@ -93,20 +93,18 @@ function check_list($art) {
 		case "B": $list = $betriebsstellen;	break;
 		case "K": $list = $kennzeichen;
 	}
-	echo "<pre>";
-	print_r($stationen);
-	foreach ($stationen as $key => $arr2) {
-		foreach ($arr2 as $station_raw => $station) {
-			if (!isset($list[strtoupper($station_raw)]) || $station != $station_raw)
+	foreach ($stationen_raw as $key => $arr2) {
+		foreach ($arr2 as $i => $station) {
+			if (!isset($list[strtoupper($station)]) || $station != $stationen[$key][$i])
 				continue;
-			if ($art == "K" && in_array($station_raw, $uc_only) && strtoupper($station_raw) != $station_raw)
+			if ($art == "K" && in_array($station, $uc_only) && strtoupper($station) != $station)
 				continue;
-			$stationen[$key][$station_raw] = $list[strtoupper($station_raw)];
+			$stationen[$key][$i] = $list[strtoupper($station)];
 			$found++;
 		}
 	}
-	print_r($stationen);
-	echo "---$art--$found--$start---$ziel--";
+	// print_r($stationen);
+	// echo "---$art--$found--$start---$ziel--";
 	if (!$found || $art == "K")
 		return 0;
 	if (!empty($stationen[1]))
