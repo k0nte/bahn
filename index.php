@@ -168,7 +168,7 @@ Münster Nord Frankfurt Süd</b></code></div>
 	<footer>
 		<h1>Urheber</h1>
 		<p>
-			<a href="http://ummen.tk/">Konstantin Ummen</a> | <a href="https://github.com/k0nte/bahn">Github</a><br>
+			<a href="//ummen.bahnu.de/">Konstantin Ummen</a> | <a href="https://github.com/k0nte/bahn">Github</a><br>
 			Ich würde mich über eine kleine <a href="https://paypal.me/ummen">Spende über Paypal</a> freuen!
 		</p>
 		<div>
