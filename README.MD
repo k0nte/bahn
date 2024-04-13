@@ -1,7 +1,5 @@
 
 # Bahnu
-Ich warte derzeit sicherheitshalber noch auf eine Rückmeldung der Bahn für eine Genehmigung dieser Website, auch wenn ich denke, dass sie nicht nötig sein dürfte. Daher wird sie derzeit nicht weiter beworben.
-
 [Wenn du mir einen Kaffee ausgeben würdest, würde ich mich freuen!](https://paypal.me/ummen)
 
 ## Weitere Eingaben
