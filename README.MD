@@ -7,9 +7,10 @@
 `Leitpunkte`, `Betriebsstellen`, `kfz`/`kennzeichen`: Liste aller Leitpunkte bzw. Betriebsstellen bzw. KFZ-Kennzeichen  
 `karte`/`radar` u.ä.: Rufe https://travic.app/ auf (Zug- und Buspositionen in Echtzeit).  
 `karte [Bahnhof]`/`radar [Bahnhof]` u.ä.: Zeige https://direkt.bahn.guru (Welche Direktverbindungen gibt es) und https://www.chronotrains.com (Wie weit komme ich in x Stunden)  
+`karte` [Bahnhof] [Bahnhof]` u.ä.: Zeige Google Maps-Navigation an, leider ohne Zeitangabe. (Die Reihenfolge der Schlüsselwörter ist egal.
 `uhrzeit = 10:30` o.ä.: Gib eine Standarduhrzeit an. Diese wird genutzt, wenn ein Datum angegeben wird, aber keine Uhrzeit (z.B. `Köln Bonn morgen`)  
-`bc`, `bc50`, `bc100`, `nv`, `fv` (Bahncards, Nah-/Fernverkehr),  
-Zeitangaben: `mo, di etc.; montag etc.; morgen, mor, übermorgen, gestern, heute; januar, februar etc.; jan, feb etc.;`  
+`bc`, `bc50`, `bc100`, `nv`, `fv`, `bp` (Bahncards, Nah-/Fernverkehr, Bestpreise),  
+Zeitangaben: `mo, di etc.; montag etc.; morgen, mor, übermorgen, gestern, heute; januar, februar etc.; jan, feb etc.`  
 `dev`: Details für Entwickler, keine Weiterleitung zu bahn.de
 
 ## Bekannte Probleme
