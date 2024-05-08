@@ -25,7 +25,7 @@ if (isset($_GET["xq"]))
 		/*<?php if (isset($_COOKIE["session"]) AND (isset($_COOKIE["BPFERN"]) OR isset($_COOKIE["BEST"]))) { ?>onsubmit="close()" <?php } ?>*/
 		?>
 		<form action="./">
-			<input id="input" name="xq" style="width: 90%; max-width: 700px; margin: 10px; font-size: 1.2em; border-radius: 4px; padding: 9px" placeholder="<?php
+			<input id="input" name="xq" placeholder="<?php
 			$placeholders = [		"Berlin Hamburg Freitag 16 Uhr",
 									"München Leipzig morgen um 7",
 									"Düsseldorf Bremen Bahncard25",
@@ -88,7 +88,9 @@ if (isset($_GET["xq"]))
 				else 
 					echo '<div style="clear:both"></div>';
 				foreach ($_COOKIE["station"] as $var => $station) {
-					echo "<a class='opt' href='?xq=-$var' title='Entfernen'>$var: $station</a>";
+					if ($var == "uhrzeit")
+						$var = "Uhrzeit";
+					echo "<a class='opt' href='?xq=-$var' title='Entfernen'>$var: ".ucfirst($station)."</a>";
 				}
 			}
 			?>
@@ -122,7 +124,7 @@ Münster Frankfurt
 Münster Nord Frankfurt Süd</b></code></div>
 			<div>KFZ-Kennzeichen</div>
 			<div><code><b>ms f</b>         <i>= Münster nach Frankfurt
-(Manche Abk. müssen großgeschrieben werden, z.B. BAD)</i></code></div>
+(Manche Abk. nur großgeschrieben, z.B. DO)</i></code></div>
 			<div>Zeitpunkt</div>
 			<div>
 				<code><b>Köln Bonn Dienstag</b>  <i>= nächsten Dienstag</i>
@@ -131,21 +133,22 @@ Münster Nord Frankfurt Süd</b></code></div>
 <b>Köln Bonn 15:30</b>     <i>= um 15:30 Uhr</i>
 <b>Köln Bonn auf 15h</b>   <i>= Ankunft 15 Uhr</i></code>
 			</div>
-			<div>Einstellungen<!--<br>(werden für nächsten <br>Aufruf gespeichert)--></div>
+			<div>Einstellungen</div>
 			<div>
 				<code><b>Bahncard25</b> / <b>bc25</b>   <i>= mit Bahncard 25</i>
 <b>Nahverkehr</b> / <b>nah</b>    <i>= nur Nahverkehr</i>
 <b>Bestpreise</b> / <b>best</b>   <i>= Bestpreise anzeigen</i>
-<b>Fahrrad</b>    / <b>rad</b>    <i>= mit Fahrrad</i>
-<b>Langsam</b>    / <b>lang</b>   <i>= auch langsame Verb.</i>
-<b>Klasse</b>              <i>= 1. Klasse</i></code>
+<b>Fahrrad</b>    / <b>rad</b>    <i>= mit Fahrrad
+Und mehr, siehe oben bei ⚙</i>
+<b>30min</b> / <b>30m</b>         <i>= Umstiegszeit 30 Minuten</i>
+<b>3P</b>                  <i>= für 3 Personen</i></code>
 			</div>
 			<div>Beispiele</div>
 			<div><code><b>Rostock nach Hamburg 7. 16h Nah</b>  <i>= am 7. des (nächsten) Monats um 16 Uhr im Nahverkehr</i>
 			
 <b>b f flughafen fr 15 bc25</b> <i>= Berlin nach Frankfurt Flughafen am Freitag um 15 Uhr mit Bahncard25</i>
 
-<b>b k über bn 2h30m</b> <i>= Berlin—Köln über Bonn, Aufenthaltsdauer 2:30 Stunden</i></code>
+<b>b bn 20m über k 2h30m</b> <i>= Berlin—Bonn über Köln, Aufenthalt 2:30 Stunden, Umstieg 20min mind.</i></code>
 			</div>
 			<div>Bahnhöfe speichern</div>
 			<div><code><b>var = Baunatal Guntershausen</b>
@@ -155,7 +158,8 @@ Münster Nord Frankfurt Süd</b></code></div>
 			<div><code><b>ICE 722</b>      <i>= Zuginformationen</i>
 <b>Köln</b> / <b>k</b>     <i>= Bahnhofsinformationen</i>
 <b>A B Kalender</b> <i>= Bestpreiskalender</i>
-<b><a href="https://travic.app/">Karte</a></b>        <i>= Zugverfolgung</i></code>
+<b><a href="https://travic.app/">Karte</a></b>        <i>= Live-Zugverfolgung</i>
+<b>N Karte</b>      <i>= Zugverbindungskarten ab Nürnberg</i></code>
 			</div>
 		</div>
 	</div>
@@ -168,8 +172,8 @@ Münster Nord Frankfurt Süd</b></code></div>
 	<footer>
 		<h1>Urheber</h1>
 		<p>
-			<a href="//ummen.bahnu.de/">Konstantin Ummen</a> | <a href="https://github.com/k0nte/bahn">Github</a><br>
-			Ich würde mich über eine kleine <a href="https://paypal.me/ummen">Spende über Paypal</a> freuen!
+			<a href="//ummen.bahnu.de/">Konstantin Ummen</a> | <a href="https://github.com/k0nte/bahn">Github</a> | Spiele <a href="//spiel.bahnu.de/">Lupp</a>, das Bahnspiel
+			<!--Ich würde mich über eine kleine <a href="https://paypal.me/ummen">Spende über Paypal</a> freuen!-->
 		</p>
 		<div>
 		Diese Website erhebt keine personenbezogenen Daten.<br>

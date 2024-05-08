@@ -3,8 +3,10 @@ $time = time();
 $heute = mktime(0,0,0);
 $time2 = microtime(true);
 date_default_timezone_set("Europe/Berlin");
+ob_start();
 require "kennzeichen.php";
 require "db_api.php";
+
 
 function myUrlEncode($string) {
 	$entities = array('%28', '%29', "+");
@@ -63,7 +65,7 @@ function aktiv($werte, $extra = []) {
 function dev() {
 	extract($GLOBALS, EXTR_REFS | EXTR_SKIP);
 	error_reporting(0);
-	echo "<h3>Auswahl</h3><b>$q</b><br>Start:\t\t".@$start->name."<br>Ziel:\t\t".@$ziel->name."<br>Tag: $tag ($weekday)<br>Monat: $monat.$jahr<br>Uhrzeit: $stunde:$minute<br>Aufenthalt: ".@$aufenthalt[2]."<br>Ankunft: $ankunft, Bahncard: $bc, <br>heute: $heute, date: $date, morgen: ".strtotime("tomorrow")."<br><pre style='overflow-wrap:anywhere;white-space:pre-wrap'>$url<br>$long1/$lat1, $long2/$lat2<br>Ausführungszeit: ";
+	echo "<h3>Auswahl</h3><b><a href='?xq=".trim(str_replace("dev", "", $q))."'>$q</a></b><br>Start:\t\t".@$start->name."<br>Ziel:\t\t".@$ziel->name."<br>Tag: $tag ($weekday)<br>Monat: $monat.$jahr<br>Uhrzeit: $stunde:$minute<br>Aufenthalt: ".@$aufenthalt[2]."<br>Ankunft: $ankunft, Bahncard: $bc, <br>heute: $heute, date: $date, morgen: ".strtotime("tomorrow")."<br><pre style='overflow-wrap:anywhere;white-space:pre-wrap'>$url<br><br>$long1/$lat1, $long2/$lat2<br>Ausführungszeit: ";
 	echo round((microtime(true) - $time2)*1000) ."ms\n";
 	echo date("H:i:s, y-m-d\\\n", $date) . '$stationen:';
 	print_r($stationen);
@@ -78,7 +80,7 @@ $q = urldecode($_GET["xq"]);
 $ql = strtolower($q);
 file_put_contents("anfragen.log", date("y-m-d H:i:s   "). $q."\n", FILE_APPEND);
 $months = ["jan", "feb", "mär", "apr", "mai", "juni", "juli", "aug", "sep", "okt", "nov", "dez"];
-$karte = ["map", "karte", "radar", "zugradar", "zugverfolgung", "züge", "echtzeit"];
+$karte = ["map", "karte", "radar", "zugradar", "zugverfolgung", "echtzeit"];
 $kalender = ["kalender", "kalendar", "calendar", "guru"];
 $props = ["bc", "bc25", "bc50", "bc100", "bahncard", "bahncard25", "bahncard50", "bahncard100", "nah", "nv", "nahverkehr", "klasse", "1.klasse", "klasse1", "klasse2", "rad", "lang", "langsam", "best", "bestpreis", "bestpreise", "bp", "bpfern", "prompt", "dev", "dev2", "kalender", "kalendar", "calendar", "fern", "fernverkehr", "fv", "direkt", "leitpunkt", "l:", "betriebsstelle", "b:"];
 $props = array_merge($props, $karte, $kalender);
@@ -97,8 +99,8 @@ if (in_array($ql, ["leitpunkte", "betriebsstellen", "kfz", "kennzeichen"])) {
 	if ($ql == "kfz")
 		$ql = "kennzeichen";
 	echo '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head>
-	<body style="background: rgb(255,207,192,1); width:100%;margin:0">';
-	echo '<h1>'.ucfirst($ql).'</h1><dl style="columns: 14em; width: 90%; margin: auto">';
+	<body style="background: rgb(255,207,192,1); width:100%;margin:0 0 90px">';
+	echo '<a href="/" style="float: right; padding-right: 30vw">Zurück</a><h1 style="margin:30px">'.ucfirst($ql).'</h1><dl style="columns: 14em; width: 90%; margin: auto">';
 	ksort($$ql);
 	foreach ($$ql as $kurz => $lang) 
 		echo "<dt>$kurz</dt><dd>$lang</dd>\n";
@@ -186,6 +188,7 @@ $minute = date("i");
 $weekday = $date = $timeday = false;
 $start = $ziel = null;
 $divide = $count = $bc = 0;
+$personen = 1;
 $aufenthalt = [];
 $ankunft = "D";
 
@@ -195,16 +198,24 @@ foreach ($keywords as $i => $k) {
 	$k = strtolower($kcase);
 	$kgross = $kcase == strtoupper($kcase);
 	switch ($k) {
-		case "": case "uhr": case "am": case "um": case "ab": case "jetzt": case "aktuell": case "abfahrt": case "bahnu": case "aufenthalt": case "aufenthaltsdauer": // case "der": 
-			if (!$kgross)					continue 2;
+		case "": case "uhr": case "am": case "um": case "ab": case "jetzt": case "aktuell": case "abfahrt": case "bahnu": case "aufenthalt": case "aufenthaltsdauer": case "umstieg": case "umstiegszeit": case "umstiegsdauer": // case "der": 
+			if (!$kgross)
+				continue 2;
 			break;
 		case "auf": case "an": case "ankunft":
-			if ($kgross)					break;
-			$ankunft = "A";					continue 2;
+			if ($kgross)						
+				break;
+			$ankunft = "A";			
+			continue 2;
+		case "bahnhof":
+			$stationen[1] = [""];
+			continue 2;
 		case "nach": case "–":
-			$divide = 1;					continue 2;
+			$divide = 1;			
+			continue 2;
 		case "über": case "via": 
-			$divide = $divide > 1 ? $divide + 1 : 2;	continue 2;
+			$divide = $divide > 1 ? $divide + 1 : 2;	
+			continue 2;
 		case "mo": case "di": case "mi": case "do": case "fr": case "sa": case "so": 
 			if ($i < 2 || $kgross)			break;
 		case "montag": case "dienstag": case "mittwoch": case "donnerstag": case "freitag": case "samstag": case "sonntag": case "mon": case "die": case "mit": case "don": case "fri": case "sam": case "son":
@@ -219,7 +230,7 @@ foreach ($keywords as $i => $k) {
 			continue 2;
 	}
 	// Monate werden erkannt nach Datum oder "Nur-Stunden-Uhrzeit"
-	if (($date OR ($timeday AND !$date AND !$minute)) AND ($key = startsWith($k, $months)) !== false) {	
+	if (($date OR ($timeday AND !$date AND !$minute)) AND ($key = startsWith($k, $months)) !== false) {
 		if ($timeday) {		// Bei "22 jan" wird die Uhrzeit "22" in Tag umgewandelt
 			$timeday = false;
 			$tag = $stunde;
@@ -242,9 +253,13 @@ foreach ($keywords as $i => $k) {
 			$jahr   = isset($match[5]) ? (strlen($match[5]) == 2 ? "20$match[5]" : $match[5])
 					: ( $monat < date("m") ? date("Y")+1 : date("Y") );
 			$date = true;
-		} elseif ($divide > 1 && preg_match("#^(\d{1,2}m)|^(\d{1,2}h)(\d{1,2})?#", $k, $match3)) {
-			// Aufenthaltsdauer für "über"
-			$aufenthalt[$divide] = (intval($match3[1]) + intval(@$match3[3])) + intval(@$match3[2]) * 60;
+		} elseif (preg_match("#^(\d{1,2}m)|^(\d{1,2}h)(\d{1,2})?#i", $k, $match3)) {
+			// Aufenthaltsdauer für "über" und Umstiegszeit
+			$aufenthalt[$divide == 1 ? 0 : $divide] = (intval($match3[1]) + intval(@$match3[3])) + intval(@$match3[2]) * 60;
+			if ($divide < 2)
+				$aufenthalt[0] = min(45, ceil($aufenthalt[0]/5)*5);
+		} elseif (preg_match("#^(\d{1,2})p$#i", $k, $match3)) {							// Personen
+			$personen = $match3[1];
 		} else {																		// Uhrzeit ohne .
 			if (isset($uhrzeit) && !isset($uhrzeit[4]))
 				$minute = $match2[0];
@@ -259,6 +274,7 @@ foreach ($keywords as $i => $k) {
 		}
 		continue;
 	}
+	
 	
 	// Station
 	$s = $kcase;
@@ -299,16 +315,6 @@ else				$date = mktime($stunde, $minute, 0, $monat, $tag, $jahr);
 $stationen_raw = $stationen;
 require "re_check.php";
 $stationen_temp = $stationen[0];
-if (aktiv($karte)) {
-	ob_start();
-	check_with_ziel($stationen);
-	ob_clean();
-	$id = $start->data->L;
-	$x =  $start->data->X;
-	$y =  $start->data->Y;
-	require "maps.php";
-	exit;
-}
 
 if (aktiv(["leitpunkt", "l:"]) == 2 AND 	  (check_list("L") || check_list("B"))) {		// Eingabe vor Cookie Betriebsstelle
 } elseif (aktiv(["betriebsstelle", "b:"]) AND (check_list("B") || check_list("L"))) {		// nix
@@ -330,7 +336,23 @@ if (!$ziel && !$start && isset($lastchance)) {
 	$ziel = $station[$lastchance[1]];
 }
 
-if ($ziel && $start->name != $ziel->name) {								// Fahrplanauskunft
+
+// Fahrplanauskunft
+
+if (aktiv($karte)) {
+	if (!$ziel) {
+		ob_clean();
+		$id = $start->data->L;
+		$x =  $start->data->X;
+		$y =  $start->data->Y;
+		require "maps.php";
+	} else {
+		header("Location: https://maps.google.com?saddr=$start->name&daddr=$ziel->name&dirflg=r");
+	}
+	exit;
+}
+
+if ($ziel && $start->name != $ziel->name) {
 	$bcA = [25  => aktiv(["bc", "bc25", "bahncard", "bahncard25"]),
 			50  => aktiv(["bc50", "bahncard50"]),
 			100 => aktiv(["bc100", "bahncard100"])];
@@ -362,10 +384,10 @@ if ($ziel && $start->name != $ziel->name) {								// Fahrplanauskunft
 	$soei = $start->extId;
 	$zoei = $ziel->extId;
 	switch ($bc) {
-		case 25: 	$r = "13:17:KLASSE_$kl:1";		break;
-		case 50:	$r = "13:23:KLASSE_$kl:1";		break;
-		case 100:	$r = "13:24:KLASSE_$kl:1";		break;
-		default:	$r = "13:16:KLASSENLOS:1";
+		case 25: 	$r = "13:17:KLASSE_$kl:$personen";		break;
+		case 50:	$r = "13:23:KLASSE_$kl:$personen";		break;
+		case 100:	$r = "13:24:KLASSE_$kl:$personen";		break;
+		default:	$r = "13:16:KLASSENLOS:$personen";
 	}
 	function bahnhofID($ort, $long, $lat, $id, $noencode = false) {
 		global $time;
@@ -388,13 +410,16 @@ if ($ziel && $start->name != $ziel->name) {								// Fahrplanauskunft
 	$rest .= aktiv("direkt") ? "&d=true" : "&d=false";
 	$nah  = aktiv(["nah", "nahverkehr", "nv"], ["fern", "fernverkehr", "fv"]);
 	$bp = strtotime("tomorrow") <= $date 		// Bestpreise nicht für gleichen Tag verfügbar
-		&& ((!$nah && $dist > 120 && aktiv("BPFERN") && aktiv(["bp", "best", "bestpreise", "bestpreis"]) !== 0) || aktiv(["BESTPREISE", "bestpreis", "BEST", "bp"]));
+		&& ((!$nah && $dist > 120 && aktiv("bpfern") && aktiv(["bp", "best", "bestpreise", "bestpreis"]) !== 0)
+			|| aktiv(["bestpreise", "bestpreis", "best", "bp"]));
 	$rest .= $bp ? "&bp=true" : "&bp=false";
 	if (aktiv(["RAD", "fahrrad"])) {
 		$r .= ",3:16:KLASSENLOS:1";
 		$rest .= "&fm=true";		// Fahrradmitnahme
 	} else 
 		$rest .= "&fm=false";
+	if (isset($aufenthalt[0]))
+		$rest .= "&mud=".$aufenthalt[0];
 	if ($nah)
 		$rest .= "&vm=03,04,05,06,07,08,09";
 	else if (aktiv(["fern", "fernverkehr", "fv"]))
@@ -413,6 +438,7 @@ if ($ziel && $start->name != $ziel->name) {								// Fahrplanauskunft
 	setcookie("session", $q.time());
 	// if ($bp && isset($_COOKIE["session"]))
 		// exit ('<script>window.open("'.$url.'","_blank")</script>');
+	file_put_contents("queries.log", date("y-m-d H:i:s   ").str_pad($q, 28)." $start->name — $ziel->name\n", FILE_APPEND);
 	header("Location: $url", true, 301);
 	// $meta = '<script>
 	// caches.match(window.location.href).then(function(response) { 

@@ -12,6 +12,15 @@ body > div, footer, #opts > p {
 	padding: 12px; width: 70%; 
 	font-size: 1.1em;
 }
+#input {
+	width: 90%;
+	max-width: 700px;
+	margin: 10px;
+	font-size: 1.2em;
+	border-radius: 4px;
+	padding: 9px;
+	border-color: #b05d80
+}
 footer a, footer a:visited {	color: #23d }
 a:hover {						color: #34e }
 #schmal { display: none }
@@ -57,4 +66,7 @@ span, #flex, footer > a, form > a {
 #opts > div {
   text-align: left;
   column-count: 2;
+}
+h1 {
+	color: #280517;
 }

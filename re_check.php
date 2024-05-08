@@ -66,11 +66,13 @@ function check($list) {
 		}
 		
 		if ($s && $name1 = station($s)) {
-			$proba[$s] = similar_text($name1, $s) / strlen($name1) + count($station[$s]->availableTransports)/8;
+			$proba[$s] = similar_text(strtolower($name1), strtolower($s)) / strlen($name1)
+					+ count($station[$s]->availableTransports)/8;
 			$start2[$i] = $s;
 		}
 		if ($z && $name2 = station($z)) {
-			$proba[$z] = similar_text($name2, $z) / strlen($name2) + count($station[$z]->availableTransports)/8;
+			$proba[$z] = similar_text(strtolower($name2), strtolower($z)) / strlen($name2)
+					+ count($station[$z]->availableTransports)/8;
 			$ziel2[$i] = $z;
 		}
 		if (isset($proba[$s], $proba[$z])) {
