@@ -1,5 +1,6 @@
 
 # Bahnu
+Entwickler: Konstantin Ummen
 [Wenn du mir einen Kaffee ausgeben würdest, würde ich mich freuen!](https://paypal.me/ummen)
 
 ## Weitere Eingaben
