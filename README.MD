@@ -10,7 +10,7 @@ Die Reihenfolge der Angaben ist grundsätzlich egal, abgesehen von `nach` und `�
 `Leitpunkte`, `Betriebsstellen`, `kfz`/`kennzeichen`: Liste aller Leitpunkte bzw. Betriebsstellen bzw. KFZ-Kennzeichen  
 `karte`/`radar`/`map` u.ä.: Rufe https://travic.app/ auf (Zug- und Buspositionen in Echtzeit).  
 `karte [Bahnhof]`/`radar [Bahnhof]` u.ä.: Zeige https://direkt.bahn.guru (Welche Direktverbindungen gibt es) und https://www.chronotrains.com (Wie weit komme ich in x Stunden)  
-`karte [Bahnhof] [Bahnhof]` u.ä.: Zeige Google Maps-Navigation an, leider ohne Zeitangabe. (Die Reihenfolge der Schlüsselwörter ist egal.  
+`karte [Bahnhof] [Bahnhof]` u.ä.: Zeige Google Maps-Navigation an, leider ohne Zeitangabe.  
 `uhrzeit = 10:30` o.ä.: Gib eine Standarduhrzeit an. Diese wird genutzt, wenn ein Datum angegeben wird, aber keine Uhrzeit (z.B. `Köln Bonn morgen`)  
 `bahncard`, `bc`, `bc50`, `bc100`, `nv`, `fv`, `bp`: Bahncards, Nah-/Fernverkehr, Bestpreise  
 `mo, di etc.; montag etc.; morgen, mor, übermorgen, gestern, heute; januar, februar etc.; jan, feb etc.`: Zeitangaben  
