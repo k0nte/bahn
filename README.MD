@@ -14,7 +14,7 @@ Die Reihenfolge der Angaben ist grundsätzlich egal, abgesehen von `nach` und `�
 `uhrzeit = 10:30` o.ä.: Gib eine Standarduhrzeit an. Diese wird genutzt, wenn ein Datum angegeben wird, aber keine Uhrzeit (z.B. `Köln Bonn morgen`)  
 `bahncard`, `bc`, `bc50`, `bc100`, `nv`, `fv`, `bp` (Bahncards, Nah-/Fernverkehr, Bestpreise),  
 Zeitangaben: `mo, di etc.; montag etc.; morgen, mor, übermorgen, gestern, heute; januar, februar etc.; jan, feb etc.`  
-`über`, `via`, `ü`, `v`: Zwischenhalt
+`über`, `via`, `ü`, `v`: Zwischenhalt  
 `dev`: Details für Entwickler, keine Weiterleitung zu bahn.de
 
 ## Bekannte Probleme
