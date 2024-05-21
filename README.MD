@@ -16,6 +16,7 @@ Die Reihenfolge der Angaben ist grundsätzlich egal, abgesehen von `nach` und `�
 `mo, di etc.; montag etc.; morgen, mor, übermorgen, gestern, heute; januar, februar etc.; jan, feb etc.`: Zeitangaben  
 `über`, `via`, `ü`, `v`: Zwischenhalt  
 `nach`, `–` (nicht "-"), `t` (target/termination): Zielort  
+`auf`, `an`, `ankunft`: Uhrzeit ist Ankunftszeit. Die Uhrzeit wird generell um 15min nach hinten verschoben.  
 `dev`: Details für Entwickler, keine Weiterleitung zu bahn.de
 
 ## Bekannte Probleme
