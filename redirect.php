@@ -5,7 +5,7 @@ $time2 = microtime(true);
 date_default_timezone_set("Europe/Berlin");
 ob_start();
 require "kennzeichen.php";
-require "db_api.php";
+require "db_api.php";		// $db_client, $db_api, $mysqli
 
 
 function myUrlEncode($string) {
@@ -179,20 +179,20 @@ accept-language: de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7,el;q=0.6,fr;q=0.5,es;q=0.4,
 
 $mysqli->query("INSERT INTO bahn_stats VALUES ($heute, 1, 1) ON DUPLICATE KEY UPDATE hits = hits + 1".(!isset($_COOKIE["session"]) ? ", users = users + 1" : ""));
 
-// Bahnhöfe usw. auslesen
+// Anfrage auslesen
 $tag = date("d");
 $monat = date("m");
 $jahr  = date("Y");
 $stunde = date("H");
 $minute = date("i");
-$weekday = $date = $timeday = false;
+$weekday = $date = $uhrzeit = false;
 $start = $ziel = null;
 $divide = $count = $bc = 0;
 $personen = 1;
 $aufenthalt = [];
 $ankunft = "D";
 
-$keywords = preg_split("#[\s\-]+#", $q);
+$keywords = preg_split("#\s+#", $q);
 foreach ($keywords as $i => $k) {
 	$kcase = trim($k);
 	$k = strtolower($kcase);
@@ -210,10 +210,10 @@ foreach ($keywords as $i => $k) {
 		case "bahnhof":
 			$stationen[1] = [""];
 			continue 2;
-		case "nach": case "–":
+		case "nach": case "–": case "t":
 			$divide = 1;			
 			continue 2;
-		case "über": case "via": 
+		case "über": case "via": case "v": case "ü":
 			$divide = $divide > 1 ? $divide + 1 : 2;	
 			continue 2;
 		case "mo": case "di": case "mi": case "do": case "fr": case "sa": case "so": 
@@ -230,9 +230,9 @@ foreach ($keywords as $i => $k) {
 			continue 2;
 	}
 	// Monate werden erkannt nach Datum oder "Nur-Stunden-Uhrzeit"
-	if (($date OR ($timeday AND !$date AND !$minute)) AND ($key = startsWith($k, $months)) !== false) {
-		if ($timeday) {		// Bei "22 jan" wird die Uhrzeit "22" in Tag umgewandelt
-			$timeday = false;
+	if (($date OR ($uhrzeit AND !$date AND !$minute)) AND ($key = startsWith($k, $months)) !== false) {
+		if ($uhrzeit) {		// Bei "22 jan" wird die Uhrzeit "22" in Tag umgewandelt
+			$uhrzeit = false;
 			$tag = $stunde;
 			$stunde = date("H");
 			$minute = date("i");
@@ -256,21 +256,28 @@ foreach ($keywords as $i => $k) {
 		} elseif (preg_match("#^(\d{1,2}m)|^(\d{1,2}h)(\d{1,2})?#i", $k, $match3)) {
 			// Aufenthaltsdauer für "über" und Umstiegszeit
 			$aufenthalt[$divide == 1 ? 0 : $divide] = (intval($match3[1]) + intval(@$match3[3])) + intval(@$match3[2]) * 60;
-			if ($divide < 2)
-				$aufenthalt[0] = min(45, ceil($aufenthalt[0]/5)*5);
+			if ($divide < 2) {
+				if (!$uhrzeit && isset($match3[2]) && !isset($match3[3]) && intval($match3[2]) > 1) {	// z.B. "9h"
+					$aufenthalt[0] = 0;
+					$stunde = intval($match3[2]);
+					$minute = $ankunft == "A" ? 15 : 0;
+					$uhrzeit = true;
+				} else
+					$aufenthalt[0] = min(45, ceil($aufenthalt[0]/5)*5);
+			}
 		} elseif (preg_match("#^(\d{1,2})p$#i", $k, $match3)) {							// Personen
 			$personen = $match3[1];
 		} else {																		// Uhrzeit ohne .
-			if (isset($uhrzeit) && !isset($uhrzeit[4]))
-				$minute = $match2[0];
+			if (isset($m_uhrzeit) && !isset($m_uhrzeit[4]))
+				$minute = $match2[0];		// Bei "22 10" wird 10 zu $minute
 			else {
-				preg_match("#(\d+)(:(\d+))?#", $k, $uhrzeit);
-				$stunde = $uhrzeit[1];
-				$minute = isset($uhrzeit[3]) ? $uhrzeit[3] : 0;
+				preg_match("#(\d+)(:(\d+))?#", $k, $m_uhrzeit);
+				$stunde = $m_uhrzeit[1];
+				$minute = isset($m_uhrzeit[3]) ? $m_uhrzeit[3] : 0;
 			}
 			if ($ankunft == "A")
 				$minute += 15;
-			$timeday = true;
+			$uhrzeit = true;
 		}
 		continue;
 	}
@@ -301,7 +308,7 @@ foreach ($keywords as $i => $k) {
 	$stationen[$divide][] = str_replace(["+", "#", ".", ",", "–", " "], "", $s);
 }
 
-if (!$timeday AND $date AND isset($_COOKIE["station"]["uhrzeit"])) {
+if (!$uhrzeit AND $date AND isset($_COOKIE["station"]["uhrzeit"])) {
 	preg_match("/(\d+)([^\d]+)?(\d+)?/", $_COOKIE["station"]["uhrzeit"], $match);
 	$stunde = $match[1];
 	$minute = isset($match[3]) ? $match[3] : 0;
@@ -311,6 +318,7 @@ if (!$timeday AND $date AND isset($_COOKIE["station"]["uhrzeit"])) {
 if ($weekday)		$date = $weekday + $stunde*3600+$minute*60;
 else				$date = mktime($stunde, $minute, 0, $monat, $tag, $jahr);
 
+// Start- und Zielbahnhöfe durchprobieren
 
 $stationen_raw = $stationen;
 require "re_check.php";
@@ -414,8 +422,8 @@ if ($ziel && $start->name != $ziel->name) {
 			|| aktiv(["bestpreise", "bestpreis", "best", "bp"]));
 	$rest .= $bp ? "&bp=true" : "&bp=false";
 	if (aktiv(["RAD", "fahrrad"])) {
-		$r .= ",3:16:KLASSENLOS:1";
-		$rest .= "&fm=true";		// Fahrradmitnahme
+		$r .= ",3:16:KLASSENLOS:$personen";		// Fahrradticket
+		$rest .= "&fm=true";					// Fahrradmitnahme
 	} else 
 		$rest .= "&fm=false";
 	if (isset($aufenthalt[0]))
@@ -462,7 +470,7 @@ if ($ziel && $start->name != $ziel->name) {
 		return $nachricht = "Suchanfrage nicht erkannt.";
 	}
 	
-	$bahnhof = strtolower(str_replace(["ß", "ä", "ö", "ü", "(", ")", " "], ["ss", "ae", "oe", "ue", "-", "-", "-"], $start->name));
+	$bahnhof = str_replace(["ß", "ä", "ö", "ü", "(", ")", " "], ["ss", "ae", "oe", "ue", "-", "-", "-"], strtolower($start->name));
 	header("Location: https://www.bahnhof.de/$bahnhof");
 	exit;
 }
