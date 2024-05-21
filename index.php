@@ -36,41 +36,6 @@ if (isset($_GET["xq"]))
 									"Dresden Leipzig 14:30"		];
 			echo $placeholders[array_rand($placeholders)];
 			?>" value="<?php if (isset($q)) echo $q ?>" />
-			<script>
-				// Get the input field and the initial placeholder text
-				var inputField = document.getElementById('input');
-				setTimeout(function() {
-					inputField.setAttribute('autofocus', 'autofocus');
-					inputField.click()
-					inputField.focus()
-				}, 100);
-				<?php if (isset($_COOKIE["PROMPT"]) AND !isset($_GET["xq"])) { ?>
-					setTimeout(function() {
-						answer = prompt("Wo soll die Fahrt hingehen?")
-						if (answer != null) 
-							window.location = "?xq="+answer
-					}, 5)
-				<?php } ?>
-					
-				
-				var placeholder = inputField.getAttribute('placeholder');
-				// Clear the initial placeholder text
-				inputField.setAttribute('placeholder', '');
-
-				// Function to set the placeholder text character by character
-				function setPlaceholderText(index) {
-					inputField.setAttribute('placeholder', placeholder.substring(0, index));
-
-					if (index < placeholder.length) {
-						setTimeout(function () {
-							setPlaceholderText(index + 1);
-						}, 39); // Adjust the time interval to control the speed
-					}
-				}
-
-				// Call the function to start displaying the placeholder text character by character
-				setPlaceholderText(0);
-			</script>
 			<?php 
 			$found = false;
 			foreach ($_COOKIE as $id => $cookie) {
@@ -101,27 +66,28 @@ if (isset($_GET["xq"]))
 			<p>Wähle Einstellungen, die für alle zukünftigen Suchen gespeichert werden. Willst du bei einer Suche die Einstellung ignorieren, schreibe „-Einstellung“, also z.B. „-nah“.</p>
 			<div>
 			<?php 
-				$opts = ["BC25|BC50" => "Bahncard", "Best|BPFern" => "Bestpreise (BPFern: ab 120km)", "Nah|Fern" => "Nur Nah-/Fernverkehr", "Rad" => "Mit Fahrrad", "Lang" => "Auch langsame Verbindungen", "Klasse" => "1. Klasse", "Direkt" => "Nur Direktverbindungen", "Prompt" => "Zeige die Tastatur bei Mobilgeräten sofort", "Leitpunkt" => "Suche vorrangig nach Leitpunkten", "Betriebsstelle" => "Suche vorrangig nach Betriebsstellen"];
+				$opts = ["BC25|BC50" => "Bahncard", "Best|BPFern" => "Bestpreise (BPFern: ab 120km)", "Nah|Fern" => "Nur Nah-/Fernverkehr", "Rad" => "Mit Fahrrad", "Klasse" => "1. Klasse", "Direkt" => "Nur Direktverbindungen", "Lang" => "Auch langsame Verbindungen", "Prompt" => "Zeige die Tastatur bei Mobilgeräten sofort", "Leitpunkt" => "Suche vorrangig nach Leitpunkten", "Betriebsstelle" => "Suche vorrangig nach Betriebsstellen"];
 				foreach ($opts as $key => $desc) {
 					$keys = explode("|", $key);
+					if ($key == "Prompt") 
+						echo "<h2>Erweitert</h2>
+							<a class='opt' href='#' onclick=\"fill('Uhrzeit = ')\">Uhrzeit</a> Setze Standarduhrzeit<br>";
 					foreach ($keys as $k)
 						echo "<a class='opt' href='?xq=$k'>$k</a>";
 					echo " $desc<br>";
 				}
 			?>
+				
 			</div>
 		</div>
-		<script>
-			document.getElementById('opts').hidden = true
-		</script>
 	</div>
 	<div>
 		<h1>Mögliche Eingaben</h1>
 		<div id="flex">
 			<div>Von A nach B</div>
-			<div><code><b>Münster nach Frankfurt
-Münster Frankfurt
-Münster Nord Frankfurt Süd</b></code></div>
+			<div><code><b>Münster nach Frankfurt</b>
+<b>Münster Frankfurt</b>
+<b>Münster Nord Frankfurt Süd</b></code></div>
 			<div>KFZ-Kennzeichen</div>
 			<div><code><b>ms f</b>         <i>= Münster nach Frankfurt
 (Manche Abk. nur großgeschrieben, z.B. DO)</i></code></div>
@@ -131,7 +97,7 @@ Münster Nord Frankfurt Süd</b></code></div>
 <b>Köln Bonn am 3.</b>     <i>= am 3. (z.B. 3.10.)</i>
 <b>Köln Bonn 3.10.</b>     <i>= am 3. Oktober</i>
 <b>Köln Bonn 15:30</b>     <i>= um 15:30 Uhr</i>
-<b>Köln Bonn auf 15h</b>   <i>= Ankunft 15 Uhr</i></code>
+<b>Köln Bonn auf 15</b>    <i>= Ankunft 15 Uhr</i></code>
 			</div>
 			<div>Einstellungen</div>
 			<div>
@@ -148,7 +114,7 @@ Und mehr, siehe oben bei ⚙</i>
 			
 <b>b f flughafen fr 15 bc25</b> <i>= Berlin nach Frankfurt Flughafen am Freitag um 15 Uhr mit Bahncard25</i>
 
-<b>b bn 20m über k 2h30m</b> <i>= Berlin—Bonn über Köln, Aufenthalt 2:30 Stunden, Umstieg 20min mind.</i></code>
+<b>b k 20m über j 2h30m 14</b> <i>= Berlin—Köln über Jena, Aufenthalt 2:30h, Umstieg 20min mind., um 14 Uhr</i></code>
 			</div>
 			<div>Bahnhöfe speichern</div>
 			<div><code><b>var = Baunatal Guntershausen</b>
@@ -159,7 +125,7 @@ Und mehr, siehe oben bei ⚙</i>
 <b>Köln</b> / <b>k</b>     <i>= Bahnhofsinformationen</i>
 <b>A B Kalender</b> <i>= Bestpreiskalender</i>
 <b><a href="https://travic.app/">Karte</a></b>        <i>= Live-Zugverfolgung</i>
-<b>N Karte</b>      <i>= Zugverbindungskarten ab Nürnberg</i></code>
+<b>Ulm Karte</b>    <i>= Zugverbindungskarten ab Ulm</i></code>
 			</div>
 		</div>
 	</div>
@@ -188,10 +154,54 @@ Und mehr, siehe oben bei ⚙</i>
 			?>			<pre style="font-size: 1.1em; margin:0">http://bahnu.de/?xq=[Suchwert]</pre>
 		</div>
 	</footer>
+	<script>
+		if (location.search.length < 5)
+			document.getElementById('opts').hidden = true
+	
+		// Get the input field and the initial placeholder text
+		var inputField = document.getElementById('input');
+		setTimeout(function() {
+			inputField.setAttribute('autofocus', 'autofocus');
+			inputField.click()
+			inputField.focus()
+		}, 100);
+		<?php if (isset($_COOKIE["PROMPT"]) AND !isset($_GET["xq"])) { ?>
+			setTimeout(function() {
+				answer = prompt("Wo soll die Fahrt hingehen?")
+				if (answer != null) 
+					window.location = "?xq="+answer
+			}, 5)
+		<?php } ?>
+			
 		
+		var placeholder = inputField.getAttribute('placeholder');
+		// Clear the initial placeholder text
+		inputField.setAttribute('placeholder', '');
+
+		// Function to set the placeholder text character by character
+		function setPlaceholderText(index) {
+			inputField.setAttribute('placeholder', placeholder.substring(0, index));
+
+			if (index < placeholder.length) {
+				setTimeout(function () {
+					setPlaceholderText(index + 1);
+				}, 39); // Adjust the time interval to control the speed
+			}
+		}
+
+		// Call the function to start displaying the placeholder text character by character
+		setPlaceholderText(0);
+		function fill(text) {
+			inputField.focus()
+			inputField.value = text;
+		}
+		
+		bold = Array.from(document.querySelectorAll('b'))
+		document.getElementById("flex").addEventListener('click', event => {
+			if (!bold.includes(event.target))
+				return
+			fill(event.target.innerText)
+		})
+	</script>
 </body>
 </html>
-<?php
-// DB Client Secret
-// 9cc94c471e26d163d680f4dae065b264
-?>
