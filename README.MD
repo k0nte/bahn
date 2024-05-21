@@ -4,6 +4,8 @@ Entwickler: Konstantin Ummen
 [Wenn du mir einen Kaffee ausgeben würdest, würde ich mich freuen!](https://paypal.me/ummen)
 
 ## Weitere Eingaben
+Die Reihenfolge der Angaben ist grundsätzlich egal, abgesehen von `nach` und `über`. Zeitangaben und Schlüsselwörter können am Anfang oder in der Mitte stehen.  
+  
 `[leer]`/`start`/`?` etc.: Startseite aufrufen  
 `Leitpunkte`, `Betriebsstellen`, `kfz`/`kennzeichen`: Liste aller Leitpunkte bzw. Betriebsstellen bzw. KFZ-Kennzeichen  
 `karte`/`radar`/`map` u.ä.: Rufe https://travic.app/ auf (Zug- und Buspositionen in Echtzeit).  
@@ -12,7 +14,7 @@ Entwickler: Konstantin Ummen
 `uhrzeit = 10:30` o.ä.: Gib eine Standarduhrzeit an. Diese wird genutzt, wenn ein Datum angegeben wird, aber keine Uhrzeit (z.B. `Köln Bonn morgen`)  
 `bahncard`, `bc`, `bc50`, `bc100`, `nv`, `fv`, `bp` (Bahncards, Nah-/Fernverkehr, Bestpreise),  
 Zeitangaben: `mo, di etc.; montag etc.; morgen, mor, übermorgen, gestern, heute; januar, februar etc.; jan, feb etc.`  
-`über`, `via`, `ü`, `v`: "über".  
+`über`, `via`, `ü`, `v`: Zwischenhalt
 `dev`: Details für Entwickler, keine Weiterleitung zu bahn.de
 
 ## Bekannte Probleme
